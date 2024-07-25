@@ -20,7 +20,7 @@ def load_data():
    
    list_values = list(sheet.values)
    print(list_values)
-   for row in list_values[0:]:
+   for row in list_values[1:]:
       treeview.insert("","end",values=row[0:])
      
    
