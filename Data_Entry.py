@@ -4,7 +4,31 @@ import openpyxl
 import os
 import tkcalendar 
 import datetime
+from tkinter import messagebox
+monthly_totals = {}
 
+
+def update_monthly_total(category, amount, month):
+
+    # Initialize the totals for the month if it doesn't exist
+    if month not in monthly_totals:
+        monthly_totals[month] = [0] * 11  # 11 categories
+   
+    if month in monthly_totals:
+        # Update the total for the selected category
+        categories = ["Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros"]
+        index = categories.index(category)
+
+        monthly_totals[month][index] += amount
+
+    else:
+        # If the month doesn't exist, set the total for the selected category
+        categories = ["Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros"]
+        index = categories.index(category)
+
+        monthly_totals[month][index] = amount
+   
+      
 # Save insterted data into the correct excel sheet
 def insert_row():
    date = expense_date.cget("text")
@@ -14,7 +38,9 @@ def insert_row():
    amount = float(expense_value.get())
    cuota = expense_cuota.get()
    desc = expense_entry.get()
-   #test test
+   # saving the total of each category ("Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros")
+   update_monthly_total(category, amount, month)
+          
    filepath = "./Gastos.xlsx"
    workbook = openpyxl.load_workbook(filepath)
    
@@ -23,7 +49,7 @@ def insert_row():
    except KeyError:
       sheet = workbook.active
    
-   new_row = [date, category, amount, desc if desc else " ", cuota]
+   new_row = [date, category, amount, desc if desc else " ", cuota if cuota else " "]
    sheet.append(new_row)
    workbook.save(filepath)
    
@@ -34,14 +60,16 @@ def load_data():
    month = month_select.get()
 
    filepath = "./Gastos.xlsx"
-   # Check if excel file exist
+   # Check if excel file exist in path
    if not os.path.exists(filepath):
-      workbook = openpyxl.Workbook()
-      sheet = workbook.active
-      heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
-      sheet.append(heading)
-      workbook.save(filepath)
+      messagebox.showerror(title="Error", message="No se encuentra el archivo Gastos.xlsx")
+      #workbook = openpyxl.Workbook()
+      #sheet = workbook.active
+      #heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
+      #sheet.append(heading)
+      #workbook.save(filepath)
       
+
    workbook = openpyxl.load_workbook(filepath)
    #print(month)
    try:
