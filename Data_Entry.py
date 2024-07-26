@@ -11,7 +11,7 @@ def insert_row():
    month = date.split("-")[1]
 
    category = expense_type.get()
-   amount = expense_value.get()
+   amount = float(expense_value.get())
    cuota = expense_cuota.get()
    desc = expense_entry.get()
 
@@ -23,11 +23,11 @@ def insert_row():
    except KeyError:
       sheet = workbook.active
    
-   new_row = [date, category, amount, desc, cuota]
+   new_row = [date, category, amount, desc if desc else " ", cuota]
    sheet.append(new_row)
    workbook.save(filepath)
    
-   treeview.insert("","end",values=[date,category,amount,desc])
+   treeview.insert("","end",values=[date,category,amount,desc if desc else " "])
 
 # Load data from excel file on the selected month
 def load_data():
@@ -50,7 +50,11 @@ def load_data():
       sheet = workbook.active
    
    list_values = list(sheet.values)
-   print(list_values)
+   
+   #clear the treeview window before printing
+   for item in treeview.get_children():
+      treeview.delete(item)
+      
    for row in list_values[1:]:
       treeview.insert("","end",values=row[0:])
 
@@ -66,7 +70,7 @@ def show_calendar():
 # Update the button with the selected date     
 def update_date(event):
       date_text = cal.get_date()
-      date = datetime.datetime.strptime(date_text, "%d/%m/%y").strftime("%Y-%m-%d")
+      date = datetime.datetime.strptime(date_text, "%m/%d/%y").strftime("%Y-%m-%d")
       expense_date.config(text=date)
       cal.grid_remove()
       #Reset the padding done to the other buttons when the calendar is hidden
@@ -91,7 +95,7 @@ root.tk.call("source", "forest-dark.tcl")
 style.theme_use("forest-dark")
 
 #types of expenses
-combo_list = ["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros"]
+combo_list = ["Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros"]
 cuota_list = ["1","3","6","12","24","36","48"]
 frame = ttk.Frame(root)
 frame.pack()
