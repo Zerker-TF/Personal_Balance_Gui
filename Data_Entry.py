@@ -2,11 +2,38 @@ import tkinter as tk
 from tkinter import ttk
 import openpyxl
 import os
+import tkcalendar 
+import datetime
 
-# Load data from excel file
+# Save insterted data into the correct excel sheet
+def insert_row():
+   date = expense_date.cget("text")
+   month = date.split("-")[1]
+
+   category = expense_type.get()
+   amount = expense_value.get()
+   cuota = expense_cuota.get()
+   desc = expense_entry.get()
+
+   filepath = "./Gastos.xlsx"
+   workbook = openpyxl.load_workbook(filepath)
+   
+   try:
+      sheet = workbook[months[int(month)-1]]
+   except KeyError:
+      sheet = workbook.active
+   
+   new_row = [date, category, amount, desc, cuota]
+   sheet.append(new_row)
+   workbook.save(filepath)
+   
+   treeview.insert("","end",values=[date,category,amount,desc])
+
+# Load data from excel file on the selected month
 def load_data():
-     
-   filepath = "K:\Tomas\Arduino proyects\Python\TKinter\Gastos.xlsx"
+   month = month_select.get()
+
+   filepath = "./Gastos.xlsx"
    # Check if excel file exist
    if not os.path.exists(filepath):
       workbook = openpyxl.Workbook()
@@ -16,14 +43,37 @@ def load_data():
       workbook.save(filepath)
       
    workbook = openpyxl.load_workbook(filepath)
-   sheet = workbook.active
+   #print(month)
+   try:
+      sheet = workbook[month]
+   except KeyError:
+      sheet = workbook.active
    
    list_values = list(sheet.values)
    print(list_values)
    for row in list_values[1:]:
       treeview.insert("","end",values=row[0:])
-     
-   
+
+# Show calendar when clicking on the button
+def show_calendar():
+   cal.grid()
+   # Pad the location of the other buttons when calendar is shown
+   expense_type.grid_configure(pady=(200, 5))
+   expense_entry.grid_configure(pady=(5, 5))
+   expense_value.grid_configure(pady=(5, 5))
+   expense_cuota.grid_configure(pady=(5, 5))
+
+# Update the button with the selected date     
+def update_date(event):
+      date_text = cal.get_date()
+      date = datetime.datetime.strptime(date_text, "%d/%m/%y").strftime("%Y-%m-%d")
+      expense_date.config(text=date)
+      cal.grid_remove()
+      #Reset the padding done to the other buttons when the calendar is hidden
+      expense_type.grid_configure(pady=(5, 5))
+      expense_entry.grid_configure(pady=(5, 5))
+      expense_value.grid_configure(pady=(5, 5))
+      expense_cuota.grid_configure(pady=(5, 5))
 
 # Theme change from dark to light mode
 def toggle_mode():
@@ -31,24 +81,6 @@ def toggle_mode():
         style.theme_use("forest-light")
      else:
            style.theme_use("forest-dark")
-
-def insert_row():
-   date = expense_date.get()
-   category = expense_type.get()
-   amount = expense_value.get()
-   cuota = expense_cuota.get()
-   desc = expense_entry.get()
-   
-   filepath = "K:\Tomas\Arduino proyects\Python\TKinter\Gastos.xlsx"
-   workbook = openpyxl.load_workbook(filepath)
-   sheet = workbook.active
-   
-   new_row = [date, category, amount, desc, cuota]
-   sheet.append(new_row)
-   workbook.save(filepath)
-   
-   treeview.insert("","end",values=[date,category,amount,desc])
-
   
 root = tk.Tk()
 
@@ -69,10 +101,15 @@ widgets_frame.grid(row=0, column=0, padx=20, pady=20)
 
 # Widgets to insert data
 
-expense_date = ttk.Entry(widgets_frame)
-expense_date.insert(0,"YYYY-MM-DD")
-expense_date.bind("<FocusIn>", lambda e: expense_date.delete('0', 'end'))
+expense_date = ttk.Button(widgets_frame, text="Fecha", command=show_calendar)
 expense_date.grid(row=0, column=0, padx=5, pady=(0, 5), sticky="ew")
+#Calendar widget
+cal = tkcalendar.Calendar(widgets_frame, selectmode="day", year=datetime.date.today().year, month=datetime.date.today().month, day=datetime.date.today().day)
+cal.grid(row=1, column=0, padx=5, pady=(0, 5), sticky="ew")
+cal.grid_remove()
+# Bind the update_date function to the <<CalendarSelected>> event
+cal.bind("<<CalendarSelected>>", update_date)
+
 
 expense_type = ttk.Combobox(widgets_frame, values=combo_list)
 expense_type.insert(0,"Clasificacion")
@@ -94,7 +131,7 @@ expense_cuota.grid(row=4,column=0,padx=5, pady=(0,5), sticky="ew")
 
 button = ttk.Button(widgets_frame, text="Guardar", command=insert_row)
 button.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
-#
+
 
 separator = ttk.Separator(widgets_frame)
 separator.grid(row=6, column=0, padx=(20,10), pady=10, sticky="ew")
@@ -107,10 +144,22 @@ theme_switch.grid(row=7, column=0, padx=5, pady=10, sticky="nsew")
 # selected month data tree view 
 
 treeFrame = ttk.Frame(frame)
-treeFrame.grid(row=0, column=1, pady=10)
+treeFrame.grid(row=0, column=1, padx=30, pady=5)
 treeScroll = ttk.Scrollbar(treeFrame)
 treeScroll.pack(side="right", fill="y")
 
+# Button to select month to load
+months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+month_select = ttk.Combobox(treeFrame, values=months)
+month_select.insert(0, "Mes")
+month_select.pack()
+# Load the information from the selected month
+load_month = ttk.Button(treeFrame, text="Cargar", command=load_data)
+load_month.pack()
+
+
+
+# Configure the treeview headings
 cols = ("Fecha","Clasificacion","Monto","Descripcion")
 treeview = ttk.Treeview(treeFrame, show="headings", 
                         yscrollcommand=treeScroll.set, columns=cols, height=10)
@@ -125,8 +174,6 @@ treeview.heading("Descripcion", text="Descripcion", anchor="center")
 treeview.pack()
 treeScroll.config(command=treeview.yview)
 
-# Load the data to .xlxs
-load_data()
 
 
 root.mainloop()
