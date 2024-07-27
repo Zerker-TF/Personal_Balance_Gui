@@ -10,24 +10,18 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
 
-# Grabs the total spent in each category for the selected month from the excel file
-def monthly_total(month):
+# Saves the total spent in each category for the selected month 
+def monthly_total(month, amount, category):
  
-   filepath = "./Gastos.xlsx"
-   workbook = openpyxl.load_workbook(filepath)
-   try:
-      sheet = workbook[month]
-   except KeyError:
-      sheet = workbook.active
-   # grab the values from the rows F to N to exclude "Ingresos" and "Ahorros"
-   values = []
-   for cell in sheet[2][5:14]:
-      values.append(cell.value)
-   category_totals = {} 
-   for i, category in enumerate(combo_list[0:-2]): #Excludes "Ingresos" and "Ahorros" from combo_list
-      category_totals[category] = values[i]
-      
-   return category_totals
+   global category_totals
+   
+   month_index = months.index(month)
+   
+   category_index = combo_list.index(category)
+   
+   category_totals[month_index][category_index] += amount
+   
+   return category_totals[month_index]
 
 # Make and show chart for the selected month
 def show_chart():
@@ -40,14 +34,12 @@ def show_chart():
       sheet = workbook[selected_month]
     except KeyError:
       sheet = workbook.active
-
-    # Get the categories and their corresponding values from the active sheet
-    category_totals = monthly_total(sheet)
-###### FIX Y AXIS PRINTING FORMULAS INSTEAD OF THEIR VALUE #######
-    # Create lists for categories and values
-    categories = list(category_totals.keys())
-    values = list(category_totals.values())
-
+   
+    data = list(sheet.values)
+    categorias =["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra"]
+    
+    amounts = [sum(float(row[2]) for row in data if row[1] == category) for category in categorias]
+    #print(amounts)
     # Create the figure and axis
     figure, ax = plt.subplots()
 
@@ -57,16 +49,16 @@ def show_chart():
     ax.set_ylabel("Total ($ARS)")
 
     # Plot the bar chart
-    ax.bar(categories, values)
-    ax.set_xticklabels(categories, rotation=45, ha='right')
+    ax.bar(categorias, amounts)
+    ax.set_xticklabels(categorias, rotation=45, ha='right')
     figure.tight_layout() # makes the labels fit the plot area
     # Create the canvas
     canvas = FigureCanvasTkAgg(figure, master=graphframe)
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=0, columnspan=2)
 
-    # Show the chart
-    
+    # Hide the chart
+   
        
 # Save insterted data into the correct excel sheet
 def insert_row():
@@ -78,7 +70,8 @@ def insert_row():
    cuota = expense_cuota.get()
    desc = expense_entry.get()
    # saving the total of each category ("Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros")
-   monthly_total(month)
+   #print(months[int(month)-1])
+   monthly_total(months[int(month)-1], amount, category)
           
    filepath = "./Gastos.xlsx"
    workbook = openpyxl.load_workbook(filepath)
@@ -152,8 +145,12 @@ def toggle_mode():
         style.theme_use("forest-light")
      else:
            style.theme_use("forest-dark")
+           
+
   
 root = tk.Tk()
+
+
 
 #import the tcl file to style the window
 style = ttk.Style(root)
@@ -166,6 +163,8 @@ combo_list = ["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salu
 cuota_list = ["1","3","6","12","24","36","48"]
 frame = ttk.Frame(root)
 frame.pack()
+
+category_totals = [[0] * (len(combo_list) - 2) for _ in range(12)]
 
 widgets_frame = ttk.LabelFrame(frame, text="Ingresar Datos")
 widgets_frame.grid(row=0, column=0, padx=20, pady=20)
@@ -248,7 +247,7 @@ graphframe = ttk.LabelFrame(frame, text="Graficas")
 graphframe.grid(row=1, column=0, columnspan=2)
 #label = ttk.Label(graphframe, text="This is a graph frame")
 #label.pack()
-
+chart_shown = False
 # show graph button
 ver_button = ttk.Button(treeFrame, text="Ver", command=show_chart)
 ver_button.pack(side="right")
