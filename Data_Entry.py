@@ -5,30 +5,69 @@ import os
 import tkcalendar 
 import datetime
 from tkinter import messagebox
-monthly_totals = {}
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-def update_monthly_total(category, amount, month):
 
-    # Initialize the totals for the month if it doesn't exist
-    if month not in monthly_totals:
-        monthly_totals[month] = [0] * 11  # 11 categories
-   
-    if month in monthly_totals:
-        # Update the total for the selected category
-        categories = ["Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros"]
-        index = categories.index(category)
-
-        monthly_totals[month][index] += amount
-
-    else:
-        # If the month doesn't exist, set the total for the selected category
-        categories = ["Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros"]
-        index = categories.index(category)
-
-        monthly_totals[month][index] = amount
-   
+# Grabs the total spent in each category for the selected month from the excel file
+def monthly_total(month):
+ 
+   filepath = "./Gastos.xlsx"
+   workbook = openpyxl.load_workbook(filepath)
+   try:
+      sheet = workbook[month]
+   except KeyError:
+      sheet = workbook.active
+   # grab the values from the rows F to N to exclude "Ingresos" and "Ahorros"
+   values = []
+   for cell in sheet[2][5:14]:
+      values.append(cell.value)
+   category_totals = {} 
+   for i, category in enumerate(combo_list[0:-2]): #Excludes "Ingresos" and "Ahorros" from combo_list
+      category_totals[category] = values[i]
       
+   return category_totals
+
+# Make and show chart for the selected month
+def show_chart():
+    # Set the active sheet based on the selected month
+    filepath = "./Gastos.xlsx"
+    workbook = openpyxl.load_workbook(filepath)
+    selected_month = month_select.get()
+    #print(selected_month)
+    try:
+      sheet = workbook[selected_month]
+    except KeyError:
+      sheet = workbook.active
+
+    # Get the categories and their corresponding values from the active sheet
+    category_totals = monthly_total(sheet)
+###### FIX Y AXIS PRINTING FORMULAS INSTEAD OF THEIR VALUE #######
+    # Create lists for categories and values
+    categories = list(category_totals.keys())
+    values = list(category_totals.values())
+
+    # Create the figure and axis
+    figure, ax = plt.subplots()
+
+    # Title and labels
+    ax.set_title(f"Total gastado por categoria para el mes {selected_month}")
+    ax.set_xlabel("Categoria")
+    ax.set_ylabel("Total ($ARS)")
+
+    # Plot the bar chart
+    ax.bar(categories, values)
+    ax.set_xticklabels(categories, rotation=45, ha='right')
+    figure.tight_layout() # makes the labels fit the plot area
+    # Create the canvas
+    canvas = FigureCanvasTkAgg(figure, master=graphframe)
+    canvas.draw()
+    canvas.get_tk_widget().grid(row=0, column=0, columnspan=2)
+
+    # Show the chart
+    
+       
 # Save insterted data into the correct excel sheet
 def insert_row():
    date = expense_date.cget("text")
@@ -39,7 +78,7 @@ def insert_row():
    cuota = expense_cuota.get()
    desc = expense_entry.get()
    # saving the total of each category ("Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros")
-   update_monthly_total(category, amount, month)
+   monthly_total(month)
           
    filepath = "./Gastos.xlsx"
    workbook = openpyxl.load_workbook(filepath)
@@ -49,7 +88,7 @@ def insert_row():
    except KeyError:
       sheet = workbook.active
    
-   new_row = [date, category, amount, desc if desc else " ", cuota if cuota else " "]
+   new_row = [date, category, amount, desc if desc else " ", cuota if cuota else 1]
    sheet.append(new_row)
    workbook.save(filepath)
    
@@ -123,7 +162,7 @@ root.tk.call("source", "forest-dark.tcl")
 style.theme_use("forest-dark")
 
 #types of expenses
-combo_list = ["Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros"]
+combo_list = ["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ingresos","Ahorros"]
 cuota_list = ["1","3","6","12","24","36","48"]
 frame = ttk.Frame(root)
 frame.pack()
@@ -141,7 +180,6 @@ cal.grid(row=1, column=0, padx=5, pady=(0, 5), sticky="ew")
 cal.grid_remove()
 # Bind the update_date function to the <<CalendarSelected>> event
 cal.bind("<<CalendarSelected>>", update_date)
-
 
 expense_type = ttk.Combobox(widgets_frame, values=combo_list)
 expense_type.insert(0,"Clasificacion")
@@ -164,7 +202,6 @@ expense_cuota.grid(row=4,column=0,padx=5, pady=(0,5), sticky="ew")
 button = ttk.Button(widgets_frame, text="Guardar", command=insert_row)
 button.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
 
-
 separator = ttk.Separator(widgets_frame)
 separator.grid(row=6, column=0, padx=(20,10), pady=10, sticky="ew")
 
@@ -173,8 +210,9 @@ theme_switch = ttk.Checkbutton(
             widgets_frame, text="Modo", style="Switch", command=toggle_mode)
 theme_switch.grid(row=7, column=0, padx=5, pady=10, sticky="nsew")
 
-# selected month data tree view 
 
+
+# selected month data tree view 
 treeFrame = ttk.Frame(frame)
 treeFrame.grid(row=0, column=1, padx=30, pady=5)
 treeScroll = ttk.Scrollbar(treeFrame)
@@ -187,9 +225,7 @@ month_select.insert(0, "Mes")
 month_select.pack()
 # Load the information from the selected month
 load_month = ttk.Button(treeFrame, text="Cargar", command=load_data)
-load_month.pack()
-
-
+load_month.pack(side="top")
 
 # Configure the treeview headings
 cols = ("Fecha","Clasificacion","Monto","Descripcion")
@@ -206,6 +242,16 @@ treeview.heading("Descripcion", text="Descripcion", anchor="center")
 treeview.pack()
 treeScroll.config(command=treeview.yview)
 
+# Graph frame
+
+graphframe = ttk.LabelFrame(frame, text="Graficas")
+graphframe.grid(row=1, column=0, columnspan=2)
+#label = ttk.Label(graphframe, text="This is a graph frame")
+#label.pack()
+
+# show graph button
+ver_button = ttk.Button(treeFrame, text="Ver", command=show_chart)
+ver_button.pack(side="right")
 
 
 root.mainloop()
