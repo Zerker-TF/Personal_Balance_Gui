@@ -52,8 +52,11 @@ def show_chart():
     ax.set_ylabel("Total ($ARS)")
 
     # Plot the bar chart
-    ax.bar(categorias, amounts, color=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#9C27B0', '#66D9EF', '#E5E5EA', '#8BC34A', '#03A9F4'])
+    #                                  comida      alquiler   expensas   internet    agua        gas       luz       salud     bolucompra
+    ax.bar(categorias, amounts, color=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'])
     ax.set_xticklabels(categorias, rotation=45, ha='right')
+    ax.set_facecolor('#c0c0c0')
+    figure.patch.set_facecolor("#808080")
     figure.tight_layout() # makes the labels fit the plot area
     # Create the canvas
     canvas = FigureCanvasTkAgg(figure, master=graphframe)
