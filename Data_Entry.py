@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import openpyxl
 import os
-import tkcalendar 
+from tkcalendar import Calendar, DateEntry
 import datetime
 from tkinter import messagebox
 import matplotlib.pyplot as plt
@@ -25,6 +25,9 @@ def monthly_total(month, amount, category):
 
 # Make and show chart for the selected month
 def show_chart():
+   global chart_shown, canvas
+   
+   if chart_shown:
     # Set the active sheet based on the selected month
     filepath = "./Gastos.xlsx"
     workbook = openpyxl.load_workbook(filepath)
@@ -49,22 +52,41 @@ def show_chart():
     ax.set_ylabel("Total ($ARS)")
 
     # Plot the bar chart
-    ax.bar(categorias, amounts)
+    ax.bar(categorias, amounts, color=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#9C27B0', '#66D9EF', '#E5E5EA', '#8BC34A', '#03A9F4'])
     ax.set_xticklabels(categorias, rotation=45, ha='right')
     figure.tight_layout() # makes the labels fit the plot area
     # Create the canvas
     canvas = FigureCanvasTkAgg(figure, master=graphframe)
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=0, columnspan=2)
-
-    # Hide the chart
-   
-       
+    
+    # Resize window when chart is shown
+    graphframe.grid_rowconfigure(0, weight=1)
+    graphframe.grid_columnconfigure(0, weight=1)
+    frame.rowconfigure(graphframe, weight=1)
+    frame.columnconfigure(graphframe, weight=1)
+    root.rowconfigure(0, weight=1)
+    root.columnconfigure(0, weight=1)
+    root.geometry("1000x720")
+    chart_shown = False
+   else:
+      # Hide the chart
+      for widget in graphframe.winfo_children():
+         widget.grid_remove()
+      graphframe.grid_rowconfigure(0, weight=0)
+      graphframe.grid_columnconfigure(0, weight=0)
+      frame.rowconfigure(0, weight=0)
+      frame.columnconfigure(0, weight=0)
+      root.rowconfigure(0, weight=0)
+      root.columnconfigure(0, weight=0)
+      root.geometry("1000x365")
+      chart_shown = True
+         
 # Save insterted data into the correct excel sheet
 def insert_row():
-   date = expense_date.cget("text")
-   month = date.split("-")[1]
-
+   date = expense_date.get_date().strftime("%Y-%m-%d")
+   month = date[5:7]
+      
    category = expense_type.get()
    amount = float(expense_value.get())
    cuota = expense_cuota.get()
@@ -101,7 +123,6 @@ def load_data():
       #sheet.append(heading)
       #workbook.save(filepath)
       
-
    workbook = openpyxl.load_workbook(filepath)
    #print(month)
    try:
@@ -118,27 +139,6 @@ def load_data():
    for row in list_values[1:]:
       treeview.insert("","end",values=row[0:])
 
-# Show calendar when clicking on the button
-def show_calendar():
-   cal.grid()
-   # Pad the location of the other buttons when calendar is shown
-   expense_type.grid_configure(pady=(200, 5))
-   expense_entry.grid_configure(pady=(5, 5))
-   expense_value.grid_configure(pady=(5, 5))
-   expense_cuota.grid_configure(pady=(5, 5))
-
-# Update the button with the selected date     
-def update_date(event):
-      date_text = cal.get_date()
-      date = datetime.datetime.strptime(date_text, "%m/%d/%y").strftime("%Y-%m-%d")
-      expense_date.config(text=date)
-      cal.grid_remove()
-      #Reset the padding done to the other buttons when the calendar is hidden
-      expense_type.grid_configure(pady=(5, 5))
-      expense_entry.grid_configure(pady=(5, 5))
-      expense_value.grid_configure(pady=(5, 5))
-      expense_cuota.grid_configure(pady=(5, 5))
-
 # Theme change from dark to light mode
 def toggle_mode():
      if theme_switch.instate(["selected"]):
@@ -149,9 +149,8 @@ def toggle_mode():
 
   
 root = tk.Tk()
-
-
-
+root.title("Balance personal")
+root.minsize(1050,365)
 #import the tcl file to style the window
 style = ttk.Style(root)
 root.tk.call("source", "forest-light.tcl")
@@ -171,14 +170,10 @@ widgets_frame.grid(row=0, column=0, padx=20, pady=20)
 
 # Widgets to insert data
 
-expense_date = ttk.Button(widgets_frame, text="Fecha", command=show_calendar)
+expense_date = DateEntry(widgets_frame)
 expense_date.grid(row=0, column=0, padx=5, pady=(0, 5), sticky="ew")
-#Calendar widget
-cal = tkcalendar.Calendar(widgets_frame, selectmode="day", year=datetime.date.today().year, month=datetime.date.today().month, day=datetime.date.today().day)
-cal.grid(row=1, column=0, padx=5, pady=(0, 5), sticky="ew")
-cal.grid_remove()
-# Bind the update_date function to the <<CalendarSelected>> event
-cal.bind("<<CalendarSelected>>", update_date)
+date_from = DateEntry(widgets_frame, selecmode="day", year=2024, month=1, day=1)
+
 
 expense_type = ttk.Combobox(widgets_frame, values=combo_list)
 expense_type.insert(0,"Clasificacion")
@@ -208,7 +203,6 @@ separator.grid(row=6, column=0, padx=(20,10), pady=10, sticky="ew")
 theme_switch = ttk.Checkbutton( 
             widgets_frame, text="Modo", style="Switch", command=toggle_mode)
 theme_switch.grid(row=7, column=0, padx=5, pady=10, sticky="nsew")
-
 
 
 # selected month data tree view 
@@ -245,9 +239,8 @@ treeScroll.config(command=treeview.yview)
 
 graphframe = ttk.LabelFrame(frame, text="Graficas")
 graphframe.grid(row=1, column=0, columnspan=2)
-#label = ttk.Label(graphframe, text="This is a graph frame")
-#label.pack()
-chart_shown = False
+
+chart_shown = True
 # show graph button
 ver_button = ttk.Button(treeFrame, text="Ver", command=show_chart)
 ver_button.pack(side="right")
