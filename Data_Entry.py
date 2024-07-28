@@ -82,7 +82,7 @@ def show_chart():
       frame.columnconfigure(0, weight=0)
       root.rowconfigure(0, weight=0)
       root.columnconfigure(0, weight=0)
-      root.geometry("1000x365")
+      root.geometry("1000x356")
       chart_shown = True
          
 # Save insterted data into the correct excel sheet
@@ -161,7 +161,7 @@ def toggle_mode():
   
 root = tk.Tk()
 root.title("Balance personal")
-root.minsize(1050,365)
+root.minsize(1050,356)
 
 #import the tcl file to style the window
 style = ttk.Style(root)
@@ -219,17 +219,22 @@ theme_switch.grid(row=7, column=0, padx=5, pady=10, sticky="nsew")
 # selected month data tree view 
 treeFrame = ttk.Frame(frame)
 treeFrame.grid(row=0, column=1, padx=30, pady=5)
+
 treeScroll = ttk.Scrollbar(treeFrame)
-treeScroll.pack(side="right", fill="y")
+treeScroll.grid(row=1, column=2, sticky="ns")
+
+button_frame = ttk.Frame(treeFrame)
+button_frame.grid(row=0, column=1, pady=5)
 
 # Button to select month to load
 months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
-month_select = ttk.Combobox(treeFrame, values=months)
+month_select = ttk.Combobox(button_frame, values=months)
 month_select.insert(0, "Mes")
-month_select.pack()
+month_select.grid(row=0, column=0, columnspan=3, sticky="ew", pady=3)
+
 # Load the information from the selected month
-load_month = ttk.Button(treeFrame, text="Cargar", command=load_data)
-load_month.pack(side="top")
+load_month = ttk.Button(button_frame, text="Cargar", command=load_data)
+load_month.grid(row=1, column=0, sticky="e", padx=0.5)
 
 # Configure the treeview headings
 cols = ("Fecha","Clasificacion","Monto","Descripcion")
@@ -243,7 +248,7 @@ treeview.heading("Fecha", text="Fecha",anchor="center")
 treeview.heading("Clasificacion", text="Clasificacion", anchor="center")
 treeview.heading("Monto", text="Monto", anchor="center")
 treeview.heading("Descripcion", text="Descripcion", anchor="center")
-treeview.pack()
+treeview.grid(row=1, column=1)
 treeScroll.config(command=treeview.yview)
 
 # Graph frame
@@ -253,8 +258,8 @@ graphframe.grid(row=1, column=0, columnspan=2)
 
 chart_shown = True
 # show graph button
-ver_button = ttk.Button(treeFrame, text="Ver", command=show_chart)
-ver_button.pack(side="right")
+ver_button = ttk.Button(button_frame, text="Ver", command=show_chart)
+ver_button.grid(row=1,column=2, sticky="w",padx=0.5)
 
 
 root.mainloop()
