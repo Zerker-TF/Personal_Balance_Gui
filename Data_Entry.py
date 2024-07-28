@@ -172,14 +172,11 @@ def edit_row():
 # Deletes the choosen row from the excel file
 def delete_row():
    selected_item = treeview.selection()[0]
-   print(f"Selected item ID: {selected_item}")
    row_values = treeview.item(selected_item, 'values')
-   print(f"row value: {row_values}")
    date = row_values[0]
-   print("entre")
-   print(f"fecha a borrar: {date}")
+   
    date = datetime.datetime.strptime(date, "%Y-%m-%d").date() #converting to datetime.date format
-   print(f"Fecha a borrar (convertida): {date}")
+   
    #load excel and sheet
    filepath = "./Gastos.xlsx"
    workbook = openpyxl.load_workbook(filepath)
@@ -194,16 +191,16 @@ def delete_row():
       if i>0:
          row_date = row[0]
          if isinstance(row_date,str):
-            print("entre al if isintance")
+            
             row_date = datetime.datetime.strptime(row_date, "%Y-%m-%d").date()
          elif isinstance(row_date, datetime.datetime):
-            print("entre al elif isinstance")
+            
             row_date = row_date.date()
          if row_date == date:
-            print("entre a row_date == date")
+            
             sheet.delete_rows(i+1)
             break
-   print("Sali de los ifs")      
+   
    workbook.save(filepath)      
    load_data()
    
