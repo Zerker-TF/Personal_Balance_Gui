@@ -133,8 +133,16 @@ def load_data():
    except KeyError:
       sheet = workbook.active
    
-   list_values = list(sheet.values)
-   
+   #list_values = list(sheet.values)
+   list_values = [list(row) for row in sheet.values]
+   # Sort the list by date
+   for i, row in enumerate(list_values[1:]):
+      if isinstance(row[0], str):
+         list_values[i+1][0] = datetime.datetime.strptime(row[0], "%Y-%m-%d").date()
+      elif isinstance (row[0], datetime.datetime):
+         list_values[i+1][0] =row[0].date()
+         
+   list_values[1:] = sorted(list_values[1:], key=lambda x: x[0])
    #clear the treeview window before printing
    for item in treeview.get_children():
       treeview.delete(item)
@@ -154,6 +162,7 @@ def toggle_mode():
 root = tk.Tk()
 root.title("Balance personal")
 root.minsize(1050,365)
+
 #import the tcl file to style the window
 style = ttk.Style(root)
 root.tk.call("source", "forest-light.tcl")
@@ -176,7 +185,6 @@ widgets_frame.grid(row=0, column=0, padx=20, pady=20)
 expense_date = DateEntry(widgets_frame)
 expense_date.grid(row=0, column=0, padx=5, pady=(0, 5), sticky="ew")
 date_from = DateEntry(widgets_frame, selecmode="day", year=2024, month=1, day=1)
-
 
 expense_type = ttk.Combobox(widgets_frame, values=combo_list)
 expense_type.insert(0,"Clasificacion")
