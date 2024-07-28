@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import openpyxl
 import os
+import openpyxl.workbook
 from tkcalendar import Calendar, DateEntry
 import datetime
 from tkinter import messagebox
@@ -156,8 +157,75 @@ def toggle_mode():
         style.theme_use("forest-light")
      else:
            style.theme_use("forest-dark")
-           
+   
+# Table item select menu and options
 
+#copy the selected row information to clipboard
+def copy_row():
+   i = i+1
+
+# Prompts a message that asks what one variable is to edited and insert the row values in the Ingresar datos box
+# and let the user insert the new values that will be sent to that specific row (CHECK MONTH BEFORE SAVING)
+def edit_row():
+   i = i+1
+
+# Deletes the choosen row from the excel file
+def delete_row():
+   selected_item = treeview.selection()[0]
+   print(f"Selected item ID: {selected_item}")
+   row_values = treeview.item(selected_item, 'values')
+   print(f"row value: {row_values}")
+   date = row_values[0]
+   print("entre")
+   print(f"fecha a borrar: {date}")
+   date = datetime.datetime.strptime(date, "%Y-%m-%d").date() #converting to datetime.date format
+   print(f"Fecha a borrar (convertida): {date}")
+   #load excel and sheet
+   filepath = "./Gastos.xlsx"
+   workbook = openpyxl.load_workbook(filepath)
+   month = month_select.get()
+   try:
+      sheet = workbook[month]
+   except KeyError:
+      sheet = workbook.active
+      
+   # Find the row 
+   for i, row in enumerate(list(sheet.values)):
+      if i>0:
+         row_date = row[0]
+         if isinstance(row_date,str):
+            print("entre al if isintance")
+            row_date = datetime.datetime.strptime(row_date, "%Y-%m-%d").date()
+         elif isinstance(row_date, datetime.datetime):
+            print("entre al elif isinstance")
+            row_date = row_date.date()
+         if row_date == date:
+            print("entre a row_date == date")
+            sheet.delete_rows(i+1)
+            break
+   print("Sali de los ifs")      
+   workbook.save(filepath)      
+   load_data()
+   
+              
+def show_menu(event):
+   item = treeview.identify_row(event.y)
+   if item:
+      menu = tk.Menu(treeview, tearoff=0)
+      menu.add_command(label="Copiar",command=copy_row)
+      menu.add_command(label="Editar",command=edit_row)
+      menu.add_command(label="Eliminar",command=delete_row)
+      menu.post(event.x_root, event.y_root)
+      treeview.bind("<Button-1>",close_menu)
+      root.bind("<Button-1>",close_menu)
+      
+def close_menu(event):
+   global menu 
+   if menu:
+      menu.unpost()
+      menu = None
+      treeview.unbind("<Button-1>")
+      root.unbind("<Button-1>")
   
 root = tk.Tk()
 root.title("Balance personal")
@@ -251,6 +319,9 @@ treeview.heading("Descripcion", text="Descripcion", anchor="center")
 treeview.grid(row=1, column=1)
 treeScroll.config(command=treeview.yview)
 
+# Configure the item selection from table
+menu = None
+treeview.bind("<Button-3>",show_menu)
 # Graph frame
 
 graphframe = ttk.LabelFrame(frame, text="Graficas")
