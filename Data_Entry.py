@@ -90,25 +90,47 @@ def show_chart():
 def insert_row():
    date = expense_date.get_date().strftime("%Y-%m-%d")
    month = date[5:7]
+   year = int(date[:4])
       
    category = expense_type.get()
    amount = float(expense_value.get())
    cuota = expense_cuota.get()
    desc = expense_entry.get()
-   # saving the total of each category ("Ingresos","Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ahorros")
+   # saving the total of each category ("Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ingresos","Ahorros")
    #print(months[int(month)-1])
    monthly_total(months[int(month)-1], amount, category)
           
    filepath = "./Gastos.xlsx"
    workbook = openpyxl.load_workbook(filepath)
    
-   try:
-      sheet = workbook[months[int(month)-1]]
-   except KeyError:
-      sheet = workbook.active
+   #try:
+   #   sheet = workbook[months[int(month)-1]]
+   #except KeyError:
+   #   sheet = workbook.active
    
-   new_row = [date, category, amount, desc if desc else " ", cuota if cuota else 1]
-   sheet.append(new_row)
+   # calculate cuotas
+   if cuota != "1":
+      cuota = int(cuota)
+      divided_amount = amount / cuota
+      month_index = int(month)
+      
+      for i in range(cuota):
+         new_date = f"{year}-{str(month_index).zfill(2)}-{date[8:]}"
+         new_row = [new_date, category, divided_amount, desc if desc else " ", cuota]
+         
+         sheet = workbook[months[month_index-1]]         
+         sheet.append(new_row)
+         # Move to the next month
+         month_index += 1
+         if month_index > 12:
+            month_index = 1
+            year += 1
+         
+   else:
+      sheet = workbook[months[int(month)-1]]
+      new_row = [date, category, amount, desc if desc else " ", cuota if cuota else 1]
+      sheet.append(new_row)     
+      
    workbook.save(filepath)
    
    treeview.insert("","end",values=[date,category,amount,desc if desc else " "])
@@ -185,8 +207,11 @@ def delete_row():
    date = row_values[0]
    
    date = datetime.datetime.strptime(date, "%Y-%m-%d").date() #converting to datetime.date format
-   
-   #load excel and sheet
+
+# Delete the row from treeview
+   treeview.delete(selected_item)
+
+   # Delete the row from Excel file
    filepath = "./Gastos.xlsx"
    workbook = openpyxl.load_workbook(filepath)
    month = month_select.get()
@@ -194,22 +219,20 @@ def delete_row():
       sheet = workbook[month]
    except KeyError:
       sheet = workbook.active
-      
+
    # Find the row 
    for i, row in enumerate(list(sheet.values)):
       if i>0:
          row_date = row[0]
          if isinstance(row_date,str):
-            
             row_date = datetime.datetime.strptime(row_date, "%Y-%m-%d").date()
          elif isinstance(row_date, datetime.datetime):
-            
             row_date = row_date.date()
          if row_date == date:
             sheet.delete_rows(i+1)
-         break
-   
-   workbook.save(filepath)      
+            break
+
+   workbook.save(filepath)    
    load_data()
    
 # Prompts a message that asks what one variable is to edited and insert the row values in the Ingresar datos box
@@ -255,8 +278,6 @@ def edit_row():
             break
 
    workbook.save(filepath)
-   
- 
               
 def show_menu(event):
    item = treeview.identify_row(event.y)
