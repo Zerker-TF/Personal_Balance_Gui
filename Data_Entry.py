@@ -8,7 +8,7 @@ import datetime
 from tkinter import messagebox
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
+import pyperclip
 
 
 # Saves the total spent in each category for the selected month 
@@ -161,8 +161,22 @@ def toggle_mode():
 # Table item select menu and options
 
 #copy the selected row information to clipboard
-def copy_row():
-   i = i+1
+def copy_row(event=None):
+   selected_item = treeview.selection()
+   if selected_item:
+      values = treeview.item(selected_item[0], 'values')
+      if event:
+         column_index = int(treeview.identify_column(event.x)[1:]) - 1
+         value = values[column_index]
+         if value is not None:
+            pyperclip.copy(str(values[column_index]))
+         else:
+            messagebox.showwarning("Error", "La celda seleccionada esta vacia")
+      else:
+         non_empty_values = [str(value) for value in values if value is not None]
+         pyperclip.copy("\t".join(non_empty_values))
+   else:
+      messagebox.showwarning('ERROR', 'Por favor, seleccione un dato primero y vuelva a intentarlo!')
 
 # Deletes the choosen row from the excel file
 def delete_row():
