@@ -26,7 +26,7 @@ def monthly_total(month, amount, category):
 
 # Make and show chart for the selected month
 def show_chart():
-   global chart_shown, canvas
+   global chart_shown, canvas, pie_canvas
    
    if chart_shown:
     # Set the active sheet based on the selected month
@@ -43,12 +43,14 @@ def show_chart():
     categorias =["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra"]
     
     amounts = [sum(float(row[2]) for row in data if row[1] == category) for category in categorias]
+    total = sum(amounts)
+    percentages = [f"{(amount/total)*100:.2f}%" for amount in amounts]
     #print(amounts)
     # Create the figure and axis
-    figure, ax = plt.subplots()
+    figure, ax = plt.subplots(figsize=(8, 6))
 
     # Title and labels
-    ax.set_title(f"Total gastado por categoria para el mes {selected_month}")
+    figure.suptitle(f"Total gastado por categoria para el mes {selected_month}", y=0.98)
     ax.set_xlabel("Categoria")
     ax.set_ylabel("Total ($ARS)")
 
@@ -59,11 +61,26 @@ def show_chart():
     ax.set_facecolor('#c0c0c0')
     figure.patch.set_facecolor("#808080")
     figure.tight_layout() # makes the labels fit the plot area
-    # Create the canvas
+    
+    # Create the canvas for the bar chart
     canvas = FigureCanvasTkAgg(figure, master=graphframe)
     canvas.draw()
-    canvas.get_tk_widget().grid(row=0, column=0, columnspan=2)
+    canvas.get_tk_widget().grid(row=0, column=0)
     
+    # Create the figure and axis for pie chart
+    figure2, ax2 = plt.subplots(figsize=(4, 6))
+    # pctdistance moves the label x amount from the center to the outside
+    ax2.pie(amounts,  autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=1.13,  colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'])
+    ax2.axis('equal')
+    figure2.suptitle("Porcentaje por categoria", y=0.98)
+    figure2.patch.set_facecolor("#808080")
+    
+    # Canvas for pie chart
+    pie_canvas = FigureCanvasTkAgg(figure2, master=graphframe)
+    pie_canvas.draw()
+    pie_canvas.get_tk_widget().grid(row=0, column=1)
+    
+        
     # Resize window when chart is shown
     graphframe.grid_rowconfigure(0, weight=1)
     graphframe.grid_columnconfigure(0, weight=1)
@@ -71,7 +88,7 @@ def show_chart():
     frame.columnconfigure(graphframe, weight=1)
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
-    root.geometry("1000x720")
+    root.geometry("1100x780")
     chart_shown = False
    else:
       # Hide the chart
@@ -83,7 +100,7 @@ def show_chart():
       frame.columnconfigure(0, weight=0)
       root.rowconfigure(0, weight=0)
       root.columnconfigure(0, weight=0)
-      root.geometry("1000x356")
+      root.geometry("1050x356")
       chart_shown = True
          
 # Save insterted data into the correct excel sheet
@@ -300,7 +317,7 @@ def close_menu(event):
   
 root = tk.Tk()
 root.title("Balance personal")
-root.minsize(1050,356)
+root.minsize(1100,356)
 
 #import the tcl file to style the window
 style = ttk.Style(root)
