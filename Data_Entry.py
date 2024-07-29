@@ -164,11 +164,6 @@ def toggle_mode():
 def copy_row():
    i = i+1
 
-# Prompts a message that asks what one variable is to edited and insert the row values in the Ingresar datos box
-# and let the user insert the new values that will be sent to that specific row (CHECK MONTH BEFORE SAVING)
-def edit_row():
-   i = i+1
-
 # Deletes the choosen row from the excel file
 def delete_row():
    selected_item = treeview.selection()[0]
@@ -197,13 +192,57 @@ def delete_row():
             
             row_date = row_date.date()
          if row_date == date:
-            
             sheet.delete_rows(i+1)
-            break
+         break
    
    workbook.save(filepath)      
    load_data()
    
+# Prompts a message that asks what one variable is to edited and insert the row values in the Ingresar datos box
+# and let the user insert the new values that will be sent to that specific row (CHECK MONTH BEFORE SAVING)
+def edit_row():
+
+   selected_item = treeview.selection()[0]
+   row_values = treeview.item(selected_item, 'values')
+   date = row_values[0]
+   date = datetime.datetime.strptime(date, "%Y-%m-%d").date() #converting to datetime.date format
+   
+   # Insert values into widgets
+   expense_date.set_date(date)
+   expense_type.set(row_values[1])
+   expense_value.delete(0,'end')
+   expense_value.insert(0, row_values[2])
+   expense_entry.delete(0,'end')
+   expense_entry.insert(0, row_values[3])
+   expense_cuota.set(row_values[4])
+   
+   # Delete the row from treeview
+   treeview.delete(selected_item)
+
+   # Delete the row from Excel file
+   filepath = "./Gastos.xlsx"
+   workbook = openpyxl.load_workbook(filepath)
+   month = month_select.get()
+   try:
+      sheet = workbook[month]
+   except KeyError:
+      sheet = workbook.active
+
+   # Find the row 
+   for i, row in enumerate(list(sheet.values)):
+      if i>0:
+         row_date = row[0]
+         if isinstance(row_date,str):
+            row_date = datetime.datetime.strptime(row_date, "%Y-%m-%d").date()
+         elif isinstance(row_date, datetime.datetime):
+            row_date = row_date.date()
+         if row_date == date:
+            sheet.delete_rows(i+1)
+            break
+
+   workbook.save(filepath)
+   
+ 
               
 def show_menu(event):
    item = treeview.identify_row(event.y)
