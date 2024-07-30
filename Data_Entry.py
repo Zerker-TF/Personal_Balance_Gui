@@ -163,12 +163,13 @@ def load_data():
    filepath = "./Gastos.xlsx"
    # Check if excel file exist in path
    if not os.path.exists(filepath):
-      messagebox.showerror(title="Error", message="No se encuentra el archivo Gastos.xlsx")
-      #workbook = openpyxl.Workbook()
-      #sheet = workbook.active
-      #heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
-      #sheet.append(heading)
-      #workbook.save(filepath)
+      workbook = openpyxl.Workbook()
+      months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+      for month_name in months:
+         sheet = workbook.create_sheet(title=month_name)
+         heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
+         sheet.append(heading)
+      workbook.save(filepath)
       
    workbook = openpyxl.load_workbook(filepath)
    #print(month)
@@ -256,8 +257,7 @@ def delete_row():
    workbook.save(filepath)    
    load_data()
    
-# Prompts a message that asks what one variable is to edited and insert the row values in the Ingresar datos box
-# and let the user insert the new values that will be sent to that specific row (CHECK MONTH BEFORE SAVING)
+#Inserts selected row data into the boxes and deletes the row from the file
 def edit_row():
 
    selected_item = treeview.selection()[0]
