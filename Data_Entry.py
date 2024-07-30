@@ -59,7 +59,11 @@ def show_chart(refresh = False):
 
     # Plot the bar chart
     #                                  comida      alquiler   expensas   internet    agua        gas       luz       salud     bolucompra
-    ax.bar(categorias, amounts, color=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'])
+    bars = ax.bar(categorias, amounts, color=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'], edgecolor='black', linewidth=1)
+    # Add shadows
+    ax.bar([x - 0.5 for x in range(len(categorias))], amounts, color=['#2E865F', '#FFC107', '#00796B', '#1976D2', '#45B3FA', '#B2E6CE', '#F7DC6F', '#4CAF50', '#0D47A1'], edgecolor='black', linewidth=1, zorder=10)
+    
+    ax.set_xticks([x - 0.25 for x in range(len(categorias))])
     ax.set_xticklabels(categorias, rotation=45, ha='right')
     ax.set_facecolor('#c0c0c0')
     figure.patch.set_facecolor("#808080")
@@ -71,11 +75,14 @@ def show_chart(refresh = False):
     canvas.get_tk_widget().grid(row=0, column=0)
     
     # pctdistance moves the label x amount from the center to the outside
-    ax2.pie(amounts,  autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=1.13,  colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'])
+    ax2.pie(amounts,  autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=1.135,  colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'])
     ax2.axis('equal')
     figure2.suptitle("Porcentaje por categoria", y=0.98)
     figure2.patch.set_facecolor("#808080")
     
+    # Add each category total to the top of each bar
+    for bar, amount in zip(bars.patches, amounts):
+       ax.text(bar.get_x() + bar.get_width()/2, bar.get_y() + bar.get_height(), f'{amount}', ha='right', va='bottom', fontweight='bold', color='black')
     # Canvas for pie chart
     pie_canvas = FigureCanvasTkAgg(figure2, master=graphframe)
     pie_canvas.draw()
