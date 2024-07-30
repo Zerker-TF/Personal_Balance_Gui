@@ -11,6 +11,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pyperclip
 
 
+
 # Saves the total spent in each category for the selected month 
 def monthly_total(month, amount, category):
  
@@ -25,10 +26,10 @@ def monthly_total(month, amount, category):
    return category_totals[month_index]
 
 # Make and show chart for the selected month
-def show_chart():
+def show_chart(refresh = False):
    global chart_shown, canvas, pie_canvas
-   
-   if chart_shown:
+   if chart_shown or refresh:
+          
     # Set the active sheet based on the selected month
     filepath = "./Gastos.xlsx"
     workbook = openpyxl.load_workbook(filepath)
@@ -48,7 +49,9 @@ def show_chart():
     #print(amounts)
     # Create the figure and axis
     figure, ax = plt.subplots(figsize=(8, 6))
-
+    # Create the figure and axis for pie chart
+    figure2, ax2 = plt.subplots(figsize=(4, 6))
+    
     # Title and labels
     figure.suptitle(f"Total gastado por categoria para el mes {selected_month}", y=0.98)
     ax.set_xlabel("Categoria")
@@ -67,8 +70,6 @@ def show_chart():
     canvas.draw()
     canvas.get_tk_widget().grid(row=0, column=0)
     
-    # Create the figure and axis for pie chart
-    figure2, ax2 = plt.subplots(figsize=(4, 6))
     # pctdistance moves the label x amount from the center to the outside
     ax2.pie(amounts,  autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=1.13,  colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'])
     ax2.axis('equal')
@@ -102,7 +103,8 @@ def show_chart():
       root.columnconfigure(0, weight=0)
       root.geometry("1050x356")
       chart_shown = True
-         
+
+    
 # Save insterted data into the correct excel sheet
 def insert_row():
    date = expense_date.get_date().strftime("%Y-%m-%d")
@@ -151,6 +153,8 @@ def insert_row():
    workbook.save(filepath)
    
    treeview.insert("","end",values=[date,category,amount,desc if desc else " "])
+   if not chart_shown:
+      show_chart(True)
 
 # Load data from excel file on the selected month
 def load_data():
