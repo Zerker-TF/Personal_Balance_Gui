@@ -124,7 +124,11 @@ def show_chart(refresh = False):
     
     # Add each category total to the top of each bar
     for bar, amount in zip(bars.patches, sorted_amounts):
-     ax.text(bar.get_x() - 0.25 + bar.get_width()/2, bar.get_y() + bar.get_height(), f'{int(amount):,}', ha='center', va='bottom', fontweight='bold', color='black')
+       if int(amount) >= 1000:
+          text = f"{amount/1000:.1f}k"
+       else:
+          text= f"{int(amount):,}"
+       ax.text(bar.get_x() - 0.15 + bar.get_width()/2, bar.get_y() + bar.get_height(), text, ha='center', va='bottom', fontweight='bold', color='black',fontsize=9)
     # Canvas for pie chart
     pie_canvas = FigureCanvasTkAgg(figure2, master=graphframe)
     pie_canvas.draw()
