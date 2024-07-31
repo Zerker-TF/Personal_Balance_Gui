@@ -73,10 +73,6 @@ def show_chart(refresh = False):
     total = sum(amounts)
 
     percentages = [f"{(amount/total)*100:.2f}%" for amount in amounts]
-    total = sum(amounts)
-    percentages = [f"{(amount/total)*100:.2f}%" for amount in amounts]
-    
-  
     
     # Create a new category "Otros" for pie chart
     otros_amount = sum(amount for amount, percentage in zip(amounts, percentages) if float(percentage.strip('%')) < 3)
@@ -87,7 +83,6 @@ def show_chart(refresh = False):
       
     
 
-    #print(amounts)
     # Create the figure and axis
     figure, ax = plt.subplots(figsize=(8, 6))
     # Create the figure and axis for pie chart
@@ -98,9 +93,7 @@ def show_chart(refresh = False):
     ax.set_xlabel("Categoria")
     ax.set_ylabel("Total ($ARS)")
 
-    # Plot the bar chart
-    
-    
+    # Plot the bar chart  
     bars = ax.bar(sorted_categories, sorted_amounts, color=[colors[category][0] for category in sorted_categories], edgecolor='black', linewidth=1)
     # Add shadows
     ax.bar([x - 0.5 for x in range(len(sorted_categories))], sorted_amounts, color=[colors[category][1] for category in sorted_categories], edgecolor='black', linewidth=1, zorder=10)
@@ -108,6 +101,8 @@ def show_chart(refresh = False):
     ax.set_xticks([x - 0.25 for x in range(len(categorias))])
     ax.set_xticklabels(sorted_categories, rotation=45, ha='right')
     ax.set_facecolor('#c0c0c0')
+    ax.text(0.95, 0.95, f"Total: ${int(total):,}", ha="right", va="top", 
+        fontweight='bold', color='black', fontsize=10, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
     figure.patch.set_facecolor("#808080")
     figure.tight_layout() # makes the labels fit the plot area
     
@@ -129,6 +124,7 @@ def show_chart(refresh = False):
        else:
           text= f"{int(amount):,}"
        ax.text(bar.get_x() - 0.15 + bar.get_width()/2, bar.get_y() + bar.get_height(), text, ha='center', va='bottom', fontweight='bold', color='black',fontsize=9)
+    
     # Canvas for pie chart
     pie_canvas = FigureCanvasTkAgg(figure2, master=graphframe)
     pie_canvas.draw()
@@ -247,6 +243,8 @@ def load_data():
       
    for row in list_values[1:]:
       treeview.insert("","end",values=row[0:])
+   if not chart_shown:
+      show_chart(True)
 
 # Theme change from dark to light mode
 def toggle_mode():
