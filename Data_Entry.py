@@ -28,6 +28,30 @@ def monthly_total(month, amount, category):
 # Make and show chart for the selected month
 def show_chart(refresh = False):
    global chart_shown, canvas, pie_canvas
+   colors = {
+
+    "Comida": ['#4CAF50', '#2E865F'],
+
+    "Alquiler": ['#FF9800', '#FFC107'],
+
+    "Expensas": ['#009688', '#00796B'],
+
+    "Internet": ['#2196F3', '#1976D2'],
+
+    "Agua": ['#66c0f4', '#45B3FA'],
+
+    "Gas": ['#c7d5e0', '#B2E6CE'],
+
+    "Luz": ['#ffd700', '#F7DC6F'],
+
+    "Transporte": ['#ff7f50', '#cc6540'],
+
+    "Salud": ['#3E69DA', '#2b4998'],
+
+    "Bolucompra": ['#d11141', '#a70d34']
+
+      }
+   
    if chart_shown or refresh:
           
     # Set the active sheet based on the selected month
@@ -44,15 +68,24 @@ def show_chart(refresh = False):
     categorias =["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra"]
     
     amounts = [sum(float(row[2]) for row in data if row[1] == category) for category in categorias]
+    sorted_categories = [category for _, category in sorted(zip(amounts, categorias), reverse=True)]
+    sorted_amounts = [amount for amount, _ in sorted(zip(amounts, categorias), reverse=True)]
+    total = sum(amounts)
+
+    percentages = [f"{(amount/total)*100:.2f}%" for amount in amounts]
     total = sum(amounts)
     percentages = [f"{(amount/total)*100:.2f}%" for amount in amounts]
+    
+  
     
     # Create a new category "Otros" for pie chart
     otros_amount = sum(amount for amount, percentage in zip(amounts, percentages) if float(percentage.strip('%')) < 3)
     otros_percentage = f"{(otros_amount/total)*100:.2f}%"
-  
+    
     pie_categorias = [category for category, percentage in zip(categorias, percentages) if float(percentage.strip('%')) >= 3] + ["Otros"]
     pie_amounts = [amount for amount, percentage in zip(amounts, percentages) if float(percentage.strip('%')) >= 3] + [otros_amount]
+      
+    
 
     #print(amounts)
     # Create the figure and axis
@@ -66,13 +99,14 @@ def show_chart(refresh = False):
     ax.set_ylabel("Total ($ARS)")
 
     # Plot the bar chart
-    #                                          comida      alquiler   expensas   internet    agua        gas       luz     salud    transporte   bolucompra
-    bars = ax.bar(categorias, amounts, color=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700','#ff7f50', '#3E69DA','#d11141'], edgecolor='black', linewidth=1)
+    
+    
+    bars = ax.bar(sorted_categories, sorted_amounts, color=[colors[category][0] for category in sorted_categories], edgecolor='black', linewidth=1)
     # Add shadows
-    ax.bar([x - 0.5 for x in range(len(categorias))], amounts, color=['#2E865F', '#FFC107', '#00796B', '#1976D2', '#45B3FA', '#B2E6CE', '#F7DC6F','#cc6540','#2b4998' , '#a70d34'], edgecolor='black', linewidth=1, zorder=10)
+    ax.bar([x - 0.5 for x in range(len(sorted_categories))], sorted_amounts, color=[colors[category][1] for category in sorted_categories], edgecolor='black', linewidth=1, zorder=10)
     
     ax.set_xticks([x - 0.25 for x in range(len(categorias))])
-    ax.set_xticklabels(categorias, rotation=45, ha='right')
+    ax.set_xticklabels(sorted_categories, rotation=45, ha='right')
     ax.set_facecolor('#c0c0c0')
     figure.patch.set_facecolor("#808080")
     figure.tight_layout() # makes the labels fit the plot area
@@ -89,7 +123,7 @@ def show_chart(refresh = False):
     figure2.patch.set_facecolor("#808080")
     
     # Add each category total to the top of each bar
-    for bar, amount in zip(bars.patches, amounts):
+    for bar, amount in zip(bars.patches, sorted_amounts):
      ax.text(bar.get_x() - 0.25 + bar.get_width()/2, bar.get_y() + bar.get_height(), f'{int(amount):,}', ha='center', va='bottom', fontweight='bold', color='black')
     # Canvas for pie chart
     pie_canvas = FigureCanvasTkAgg(figure2, master=graphframe)
