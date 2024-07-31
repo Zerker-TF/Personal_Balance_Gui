@@ -115,7 +115,7 @@ def show_chart(refresh = False):
     canvas.get_tk_widget().grid(row=0, column=0)
     
     # pctdistance moves the label x amount from the center to the outside
-    ax2.pie(pie_amounts,  autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=0.85, textprops={'fontsize':10, 'fontweight': 'bold'}  ,colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#ff7f50', '#d11141', '#808080'], labels=pie_categorias)
+    ax2.pie(pie_amounts,  autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=0.75, textprops={'fontsize':10, 'fontweight': 'bold'}  ,colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#ff7f50', '#d11141', '#808080'], labels=pie_categorias)
     ax2.axis('equal')
     figure2.suptitle("Porcentaje por categoria", y=0.98)
     figure2.patch.set_facecolor("#808080")
@@ -155,8 +155,7 @@ def show_chart(refresh = False):
       root.columnconfigure(0, weight=0)
       root.geometry("1050x356")
       chart_shown = True
-
-    
+  
 # Save insterted data into the correct excel sheet
 def insert_row():
    date = expense_date.get_date().strftime("%Y-%m-%d")
