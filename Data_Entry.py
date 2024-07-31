@@ -41,16 +41,24 @@ def show_chart(refresh = False):
       sheet = workbook.active
    
     data = list(sheet.values)
-    categorias =["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra"]
+    categorias =["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra"]
     
     amounts = [sum(float(row[2]) for row in data if row[1] == category) for category in categorias]
     total = sum(amounts)
     percentages = [f"{(amount/total)*100:.2f}%" for amount in amounts]
+    
+    # Create a new category "Otros" for pie chart
+    otros_amount = sum(amount for amount, percentage in zip(amounts, percentages) if float(percentage.strip('%')) < 3)
+    otros_percentage = f"{(otros_amount/total)*100:.2f}%"
+  
+    pie_categorias = [category for category, percentage in zip(categorias, percentages) if float(percentage.strip('%')) >= 3] + ["Otros"]
+    pie_amounts = [amount for amount, percentage in zip(amounts, percentages) if float(percentage.strip('%')) >= 3] + [otros_amount]
+
     #print(amounts)
     # Create the figure and axis
     figure, ax = plt.subplots(figsize=(8, 6))
     # Create the figure and axis for pie chart
-    figure2, ax2 = plt.subplots(figsize=(4, 6))
+    figure2, ax2 = plt.subplots(figsize=(4.5, 6))
     
     # Title and labels
     figure.suptitle(f"Total gastado por categoria para el mes {selected_month}", y=0.98)
@@ -58,10 +66,10 @@ def show_chart(refresh = False):
     ax.set_ylabel("Total ($ARS)")
 
     # Plot the bar chart
-    #                                          comida      alquiler   expensas   internet    agua        gas       luz       salud     bolucompra
-    bars = ax.bar(categorias, amounts, color=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'], edgecolor='black', linewidth=1)
+    #                                          comida      alquiler   expensas   internet    agua        gas       luz     salud    transporte   bolucompra
+    bars = ax.bar(categorias, amounts, color=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700','#ff7f50', '#3E69DA','#d11141'], edgecolor='black', linewidth=1)
     # Add shadows
-    ax.bar([x - 0.5 for x in range(len(categorias))], amounts, color=['#2E865F', '#FFC107', '#00796B', '#1976D2', '#45B3FA', '#B2E6CE', '#F7DC6F', '#4CAF50', '#0D47A1'], edgecolor='black', linewidth=1, zorder=10)
+    ax.bar([x - 0.5 for x in range(len(categorias))], amounts, color=['#2E865F', '#FFC107', '#00796B', '#1976D2', '#45B3FA', '#B2E6CE', '#F7DC6F','#cc6540','#2b4998' , '#a70d34'], edgecolor='black', linewidth=1, zorder=10)
     
     ax.set_xticks([x - 0.25 for x in range(len(categorias))])
     ax.set_xticklabels(categorias, rotation=45, ha='right')
@@ -75,7 +83,7 @@ def show_chart(refresh = False):
     canvas.get_tk_widget().grid(row=0, column=0)
     
     # pctdistance moves the label x amount from the center to the outside
-    ax2.pie(amounts,  autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=0.85, labeldistance=1.05, textprops={'fontsize':10, 'fontweight': 'bold', 'rotation_mode': 'anchor', 'rotation':35}  ,colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#7eb92d', '#1b2838'])
+    ax2.pie(pie_amounts,  autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=0.85, textprops={'fontsize':10, 'fontweight': 'bold'}  ,colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#ff7f50', '#d11141', '#808080'], labels=pie_categorias)
     ax2.axis('equal')
     figure2.suptitle("Porcentaje por categoria", y=0.98)
     figure2.patch.set_facecolor("#808080")
@@ -122,7 +130,7 @@ def insert_row():
    amount = float(expense_value.get())
    cuota = expense_cuota.get()
    desc = expense_entry.get()
-   # saving the total of each category ("Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ingresos","Ahorros")
+   # saving the total of each category ("Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra","Ingresos","Ahorros")
    #print(months[int(month)-1])
    monthly_total(months[int(month)-1], amount, category)
           
@@ -337,7 +345,7 @@ root.tk.call("source", "forest-dark.tcl")
 style.theme_use("forest-dark")
 
 #types of expenses
-combo_list = ["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Salud","Bolucompra","Ingresos","Ahorros"]
+combo_list = ["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra","Ingresos","Ahorros"]
 cuota_list = ["1","3","6","12","24","36","48"]
 frame = ttk.Frame(root)
 frame.pack()
