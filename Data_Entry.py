@@ -168,9 +168,20 @@ def insert_row():
    desc = expense_entry.get()
    # saving the total of each category ("Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra","Ingresos","Ahorros")
    #print(months[int(month)-1])
-   monthly_total(months[int(month)-1], amount, category)
+   
           
    filepath = "./Gastos.xlsx"
+   if not os.path.exists(filepath):
+      workbook = openpyxl.Workbook()
+      months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+   for month_name in months:
+    sheet = workbook.create_sheet(title=month_name)
+    heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
+    sheet.append(heading)
+    workbook.save(filepath)
+   
+   monthly_total(months[int(month)-1], amount, category)   
+   
    workbook = openpyxl.load_workbook(filepath)
    
    #try:
