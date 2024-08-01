@@ -1,21 +1,12 @@
 import tkinter as tk
-from tkinter import ttk
-import gui
-import graphs
+from frames import create_frames
 
-root = tk.Tk()
-root.title("Balance personal")
-root.minsize(1100,356)
-
-style = ttk.Style(root)
-root.tk.call("source", "forest-light.tcl")
-root.tk.call("source", "forest-dark.tcl")
-style.theme_use("forest-dark")
-
-frame = ttk.Frame(root)
-frame.pack()
-
-gui_widgets = gui.create_widgets(frame)
-graph_frame = graphs.create_graph_frame(frame)
-
-root.mainloop()
+def main():
+    root = tk.Tk()
+    root.title("Balance Personal")
+    root.minsize(1100,356)
+    create_frames(root)
+    root.mainloop()
+    
+if __name__ == "__main__":
+    main()
