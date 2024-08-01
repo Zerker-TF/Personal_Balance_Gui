@@ -11,7 +11,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pyperclip
 
 
-
 # Saves the total spent in each category for the selected month 
 def monthly_total(month, amount, category):
  
