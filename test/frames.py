@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from widgets import create_widgets
 from widgets import create_table
-from widgets import create_graphs
 
 def create_frames(root):
     style = ttk.Style(root)
@@ -26,5 +25,6 @@ def create_frames(root):
     #Graphs frame
     graphframe = ttk.Frame(frame)
     graphframe.grid(row=1,column=0,columnspan=2)
-    create_widgets(widgets_frame)
-    create_table(treeframe,graphframe,frame)
+    treeview = create_table(treeframe,graphframe,frame,root)
+    create_widgets(widgets_frame,treeview)
+    
