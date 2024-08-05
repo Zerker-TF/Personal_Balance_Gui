@@ -52,42 +52,42 @@ def create_savings_window(root):
     
         ahorros, amounts_saved, objectives = get_values()
 
-        fig, axs = plt.subplots(len(ahorros), 2, figsize=(8, 1.1*len(ahorros)))
-        fig2, axs2 = plt.subplots(len(ahorros), 1, figsize=(4, 2*len(ahorros)))
-                                
+        fig, axs = plt.subplots(len(ahorros), 1, figsize=(8, 1.1*len(ahorros)))
+       
+        fig.suptitle('Ahorros en proceso',color="#bfbfbf")    
+                           
 
         for i, (ahorro, amount_saved, objective) in enumerate(zip(ahorros, amounts_saved, objectives)):
 
             # Horizontal bar chart
-            axs[i, 0].barh(0, amount_saved, height=0.4,color='#84b86d') #Bar color
-            axs[i, 0].set_yticks([0])
-            axs[i, 0].set_yticklabels([ahorro])
-            axs[i, 0].set_xlabel('Total Ahorrado')
-            axs[i, 0].set_title('Estado de ahorros')
-            axs[i, 0].set_facecolor('#808080') #background color
-            axs[i, 0].set_ylim(-0.8, 0.8)
-            axs[i, 0].set_xlim(0,objective)
-            axs[i, 0].set_xticks([0, objective])  # Only show the objective value on the x-axis
-            axs[i, 0].text(amount_saved, 0, f'${amount_saved:.2f}', ha='left', va='center')  # Print the amount next to the bar
-        for i, (ahorro, amount_saved, objective) in enumerate(zip(ahorros, amounts_saved, objectives)):
-             # Circular progress bar
-             percentage = (amount_saved / objective) * 100
-             axs2[i].pie([percentage, 100 - percentage], colors=['#4CAF50', '#ccc'], startangle=90, autopct='%1.1f%%')
-             axs2[i].axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-             axs2[i].set_title(ahorro)  # Set the title of each pie chart
-                 # Layout so plots do not overlap
+            axs[i].barh(0, amount_saved, height=0.3,color='#84b86d') #Bar color
+            axs[i].get_yaxis().set_visible(False)
+            axs[i].spines['top'].set_visible(False)
+            axs[i].spines['right'].set_visible(False)
+            axs[i].spines['left'].set_visible(False)
+            axs[i].spines['bottom'].set_color('#808080') #changes x axis color
+            axs[i].tick_params(axis='x', colors='#808080')  # Change the color of the x-axis tick labels
+            axs[i].set_yticks([0])
+            axs[i].set_yticklabels([ahorro])    
+            axs[i].set_facecolor('#313131') #background color
+            axs[i].set_ylim(-0.4, 0.8)
+            axs[i].set_xlim(0,objective)
+            axs[i].set_xticks([0, objective])  # Only show the objective value on the x-axis
+            axs[i].set_title(ahorro, fontsize=10, loc='left',fontstyle='italic',fontweight='book',bbox=dict(facecolor='#b6d7a8', edgecolor='black', boxstyle='round,pad=0.5'))
+            #axs[i].text(amount_saved, 0, f'${amount_saved:.1f}', ha='right',va='center',fontsize=8,fontweight='bold')  # Print the amount next to the bar
+            axs[i].text(0.95, 0.98, f"Restante: ${int(objective-amount_saved):,}", ha="right", va="center", 
+            fontweight='bold', color='black', fontsize=9,  bbox=dict(facecolor='#bac4c1', edgecolor='black', boxstyle='round,pad=0.5'),
+                        transform=axs[i].transAxes)
+        
         fig.tight_layout()
-        fig2.tight_layout()
-        fig.patch.set_facecolor("#808080")
-        fig2.patch.set_facecolor("#808080")
+       
+        fig.patch.set_facecolor("#313131")
+     
         # Update the canvas
         canvas = FigureCanvasTkAgg(fig, master=visual_frame)
         canvas.draw()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        
-        canvas2 = FigureCanvasTkAgg(fig2, master=visual_frame)
-        canvas2.draw()
-        canvas2.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+     
 
     #import the tcl file to style the window
     style = ttk.Style(root)
@@ -127,6 +127,24 @@ def create_savings_window(root):
     
     visual_frame = ttk.Frame(frame)
     visual_frame.grid(row=0,column=1,padx=30,pady=10)
+    
+    table_frame = ttk.Frame(frame)
+    table_frame.grid(row=1, column=0,columnspan=4, pady=5, sticky="nsew")    
+    
+    tableScroll = ttk.Scrollbar(table_frame)
+    tableScroll.grid(row=1,column=1,sticky="ns")
+    
+    cols = ("Fecha","Monto","Total")
+    treeview = ttk.Treeview(table_frame, show="headings", 
+                            yscrollcommand=tableScroll.set, columns=cols, height=10)
+    treeview.column("Fecha", width=350, anchor="center")
+    treeview.column("Monto", width=350, anchor="center")
+    treeview.column("Total", width=350, anchor="center")
+    treeview.heading("Fecha", text="Fecha",anchor="center")
+    treeview.heading("Monto", text="Monto", anchor="center")
+    treeview.heading("Total", text="Total", anchor="center")
+    treeview.grid(row=1, column=1)
+    tableScroll.config(command=treeview.yview)
     
     update_charts()
     

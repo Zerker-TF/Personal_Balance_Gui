@@ -7,9 +7,13 @@ def main():
     root = tk.Tk()
     root.title("Balance Personal")
     root.minsize(1110,356)
+    root.grid_rowconfigure(0,weight=1)
+    root.columnconfigure(0,weight=1)
     
     Ventana = ttk.Notebook(root)
-    Ventana.grid(row=0,column=0)
+    Ventana.grid(row=0,column=0,sticky="new")
+    Ventana.columnconfigure(0,weight=1)
+    
     
     frame_gastos = ttk.Frame(Ventana)
     frame_ahorros =ttk.Frame(Ventana)
@@ -25,3 +29,4 @@ def main():
     
 if __name__ == "__main__":
     main()
+    
