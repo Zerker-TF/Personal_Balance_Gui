@@ -88,7 +88,20 @@ def create_savings_window(root):
         canvas.draw()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
      
+    def insert_table():
 
+        selected_item = ahorro_table.get()
+
+        for item in treeview.get_children():
+            treeview.delete(item)
+
+        ahorros, amounts_saved, objectives = get_values()
+       
+        for i in range(len(ahorros)):
+            
+            if ahorros[i] == selected_item:
+                treeview.insert("","end",values=(ahorros[i],amounts_saved[i],objectives[i]))
+       
     #import the tcl file to style the window
     style = ttk.Style(root)
     #root.tk.call("source", "forest-dark.tcl")
@@ -129,10 +142,18 @@ def create_savings_window(root):
     visual_frame.grid(row=0,column=1,padx=30,pady=10)
     
     table_frame = ttk.Frame(frame)
-    table_frame.grid(row=1, column=0,columnspan=4, pady=5, sticky="nsew")    
-    
+    table_frame.grid(row=2, column=0,columnspan=4, pady=5, sticky="nsew")  
+    option_frame = ttk.Frame(frame) 
+    option_frame.grid(row=1,column=0,columnspan=4, pady=5, sticky="nsew")
     tableScroll = ttk.Scrollbar(table_frame)
-    tableScroll.grid(row=1,column=1,sticky="ns")
+    tableScroll.grid(row=1,column=2,sticky="ns")
+    
+    ahorro_table = ttk.Combobox(option_frame,values=lista_ahorros)
+    ahorro_table.insert(0,"Seleccione un ahorro")
+    ahorro_table.grid(row=0,column=0,columnspan=3,sticky="ew",pady=3)
+    
+    ahorro_load = ttk.Button(option_frame, text="Cargar",command=insert_table)
+    ahorro_load.grid(row=0,column=4,sticky="ew",padx=5)
     
     cols = ("Fecha","Monto","Total")
     treeview = ttk.Treeview(table_frame, show="headings", 
@@ -146,6 +167,8 @@ def create_savings_window(root):
     treeview.grid(row=1, column=1)
     tableScroll.config(command=treeview.yview)
     
+    # add green color to the row when saved_amount == objective
+    # add red color to the row when money gets taken out.
     update_charts()
     
   
