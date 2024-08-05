@@ -175,11 +175,7 @@ def create_expense_window(root):
            workbook.save(filepath)
     
        workbook = openpyxl.load_workbook(filepath)
-    
-       #try:
-       #   sheet = workbook[months[int(month)-1]]
-       #except KeyError:
-       #   sheet = workbook.active
+  
     
        # calculate cuotas
        if cuota != "1":
