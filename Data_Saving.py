@@ -95,7 +95,7 @@ def create_savings_window(root):
     def update_charts():
         clear_charts()
         ahorros, amounts_saved, objectives, dates = get_values()
-        fig, axs = plt.subplots(len(ahorros), 1, figsize=(8, 1.1 * len(ahorros)))
+        fig, axs = plt.subplots(len(ahorros), 1, figsize=(12, 1.1 * len(ahorros)))
         fig.suptitle('Listado de Ahorros', color="#bfbfbf")
 
         for i, (ahorro, amount_saved, objective) in enumerate(zip(ahorros, amounts_saved, objectives)):
@@ -145,13 +145,16 @@ def create_savings_window(root):
     style = ttk.Style(root)
     style.theme_use("forest-dark")
 
+    
+
     frame = ttk.Frame(root)
-    frame.pack()
+    frame.pack(fill=tk.BOTH, expand=True)
+    
     lista_ahorros = ahorros_list()
 
     # Ingresar frame
     widgets_frame1 = ttk.LabelFrame(frame, text="Ingresar")
-    widgets_frame1.grid(row=0, column=0, padx=20, pady=20)
+    widgets_frame1.grid(row=0, column=0, padx=2, pady=20, sticky="nw")
 
     ahorro_select = ttk.Combobox(widgets_frame1, values=["Nuevo Ahorro"] + lista_ahorros)
     ahorro_select.insert(0, "Seleccionar ahorro")
@@ -176,7 +179,7 @@ def create_savings_window(root):
 
     # Retirar frame
     widgets_frame2 = ttk.LabelFrame(widgets_frame1, text="Retirar")
-    widgets_frame2.grid(row=5, column=0)
+    widgets_frame2.grid(row=5, column=0, sticky="ew")
 
     ahorro_select2 = ttk.Combobox(widgets_frame2, values=lista_ahorros)
     ahorro_select2.insert(0, "Seleccionar ahorro")
@@ -195,8 +198,10 @@ def create_savings_window(root):
 
     # Creating scrollable charts area
     charts_container = ttk.Frame(frame)
-    charts_container.grid(row=0, column=1,columnspan=2, padx=5, pady=5, sticky="nsew")
-    frame.columnconfigure(1,weight=1) # Expands colum 1
+    charts_container.grid(row=1, column=0, columnspan=4,rowspan=2, padx=5, pady=5, sticky="nsew")
+    frame.columnconfigure(1, weight=15)
+    frame.rowconfigure(0, weight=1)
+    frame.rowconfigure(1, weight=1)
 
     canvas_scroll = tk.Canvas(charts_container)
     scrollbar = ttk.Scrollbar(charts_container, orient="vertical", command=canvas_scroll.yview)
@@ -211,24 +216,29 @@ def create_savings_window(root):
     update_charts()
 
     visual_frame = ttk.Frame(frame)
-    visual_frame.grid(row=2, column=0, padx=20, pady=20)
-    frame.rowconfigure(2,weight=1)
-
-    ahorro_table = ttk.Combobox(visual_frame, values=lista_ahorros)
+    visual_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
+    frame.rowconfigure(1, weight=1)
+    frame.columnconfigure(0, weight=1)
+    visual_frame_buttons = ttk.Frame(visual_frame)
+    visual_frame_buttons.grid(row=0,column=1,sticky="ew")
+    
+    ahorro_table = ttk.Combobox(visual_frame_buttons, values=lista_ahorros)
     ahorro_table.insert(0, "Seleccionar ahorro")
-    ahorro_table.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+    ahorro_table.grid(row=0, column=0, padx=0.5, pady=2, sticky="w")
 
-    table_button = ttk.Button(visual_frame, text="Ver Tabla", command=insert_table)
-    table_button.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+    table_button = ttk.Button(visual_frame_buttons, text="Ver Tabla", command=insert_table)
+    table_button.grid(row=0, column=1, padx=0.5, pady=2, sticky="w")
 
     columns = ("Fecha", "Monto Ahorrado", "Objetivo")
     treeview = ttk.Treeview(visual_frame, columns=columns, show="headings")
-    treeview.heading("Fecha", text="Fecha")
-    treeview.heading("Monto Ahorrado", text="Monto Ahorrado")
-    treeview.heading("Objetivo", text="Objetivo")
-    treeview.grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
-    
+    treeview.column("Fecha", width=100, anchor="center")
+    treeview.column("Monto Ahorrado", width=100, anchor="center")
+    treeview.column("Objetivo", width=100, anchor="center")
+    treeview.heading("Fecha", text="Fecha", anchor="center")
+    treeview.heading("Monto Ahorrado", text="Monto Ahorrado", anchor="center")
+    treeview.heading("Objetivo", text="Objetivo", anchor="center")
+    treeview.grid(row=2, column=0, columnspan=2, padx=5, sticky="nsew")
+    treeview.columnconfigure(0,weight=1)
+
     visual_frame.columnconfigure(0, weight=1)
-    visual_frame.rowconfigure(1,weight=1)
-
-
+    visual_frame.rowconfigure(2, weight=1)
