@@ -60,7 +60,8 @@ def create_expense_window(root):
         sorted_categories = [category for _, category in sorted(zip(amounts, categorias), reverse=True)]
         sorted_amounts = [amount for amount, _ in sorted(zip(amounts, categorias), reverse=True)]
         total = sum(amounts)
-    
+        ingresos = sum(float(row[2]) for row in data if row[1] == "Ingresos")
+        saldo_restante = ingresos-total
        # Percentages for pie chart   
         percentages = [f"{(amount/total)*100:.2f}%" for amount in amounts]
 
@@ -99,6 +100,15 @@ def create_expense_window(root):
         # Prints the total spent in the selected month
         ax.text(0.95, 0.95, f"Total: ${int(total):,}", ha="right", va="top", 
             fontweight='bold', color='black', fontsize=10, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
+        
+        # Prints the remaining budget for the month
+        if saldo_restante >= 0:
+            ax.text(0.95, 0.88, f"Saldo: ${int(saldo_restante):,}", ha="right", va="top", 
+               fontweight='bold', color='black', fontsize=10, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
+        else:
+           ax.text(0.95, 0.88, f"Saldo: ${int(saldo_restante):,}", ha="right", va="top", 
+               fontweight='bold', color='red', fontsize=10, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
+        
         figure.patch.set_facecolor("#808080")
         figure.tight_layout() # makes the labels fit the plot area
 
@@ -133,9 +143,7 @@ def create_expense_window(root):
         graphframe.grid_columnconfigure(0, weight=1)
         frame.rowconfigure(graphframe, weight=1)
         frame.columnconfigure(graphframe, weight=1)
-        root.rowconfigure(0, weight=1)
-        root.columnconfigure(0, weight=1)
-        root.geometry("1100x780")
+        frame.geometry("1260x780")
         chart_shown = False
        else:
           # Hide the chart
@@ -145,9 +153,7 @@ def create_expense_window(root):
           graphframe.grid_columnconfigure(0, weight=0)
           frame.rowconfigure(0, weight=0)
           frame.columnconfigure(0, weight=0)
-          root.rowconfigure(0, weight=0)
-          root.columnconfigure(0, weight=0)
-          root.geometry("1100x356")
+          frame.geometry("1260x480")
           chart_shown = True
     
     # Save insterted data into the correct excel sheet
@@ -366,9 +372,7 @@ def create_expense_window(root):
           treeview.unbind("<Button-1>")
           root.unbind("<Button-1>")
     
-   # root = tk.Tk()
-   # root.title("Balance personal")
-   # root.minsize(1100,356)
+
 
     #import the tcl file to style the window
     style = ttk.Style(root)
