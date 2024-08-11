@@ -10,7 +10,11 @@ def create_expense_window(root):
         df.load_data(month, treeview)
     def insertar():
         date = exp_date.get()
-        df.insert_data(date,treeview)
+        category = exp_type.get()
+        amount = int(exp_value.get())
+        cuota = exp_cuota.get()
+        desc = exp_entry.get()
+        df.insert_data(date,category,amount,cuota,desc,treeview)
     # Table item select menu and options
 
      #import the tcl file to style the window
