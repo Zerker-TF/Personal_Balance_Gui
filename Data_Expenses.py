@@ -141,9 +141,7 @@ def create_expense_window(root):
         # Resize window when chart is shown
         graphframe.grid_rowconfigure(0, weight=1)
         graphframe.grid_columnconfigure(0, weight=1)
-        frame.rowconfigure(graphframe, weight=1)
-        frame.columnconfigure(graphframe, weight=1)
-        frame.geometry("1260x780")
+        
         chart_shown = False
        else:
           # Hide the chart
@@ -151,9 +149,6 @@ def create_expense_window(root):
              widget.grid_remove()
           graphframe.grid_rowconfigure(0, weight=0)
           graphframe.grid_columnconfigure(0, weight=0)
-          frame.rowconfigure(0, weight=0)
-          frame.columnconfigure(0, weight=0)
-          frame.geometry("1260x480")
           chart_shown = True
     
     # Save insterted data into the correct excel sheet

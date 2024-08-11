@@ -103,6 +103,8 @@ def show_chart(refresh = False):
     ax.set_xticks([x - 0.25 for x in range(len(categorias))])
     ax.set_xticklabels(sorted_categories, rotation=45, ha='right')
     ax.set_facecolor('#c0c0c0')
+    
+    # Prints the total spent in the selected month
     ax.text(0.95, 0.95, f"Total: ${int(total):,}", ha="right", va="top", 
         fontweight='bold', color='black', fontsize=10, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
     figure.patch.set_facecolor("#808080")
@@ -152,7 +154,7 @@ def show_chart(refresh = False):
       frame.columnconfigure(0, weight=0)
       root.rowconfigure(0, weight=0)
       root.columnconfigure(0, weight=0)
-      root.geometry("1050x356")
+      root.geometry("1100x356")
       chart_shown = True
   
 # Save insterted data into the correct excel sheet
@@ -167,17 +169,17 @@ def insert_row():
    desc = expense_entry.get()
    # saving the total of each category ("Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra","Ingresos","Ahorros")
    #print(months[int(month)-1])
-   
+   months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
           
    filepath = "./Gastos.xlsx"
    if not os.path.exists(filepath):
       workbook = openpyxl.Workbook()
       months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
-   for month_name in months:
-    sheet = workbook.create_sheet(title=month_name)
-    heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
-    sheet.append(heading)
-    workbook.save(filepath)
+      for month_name in months:
+       sheet = workbook.create_sheet(title=month_name)
+       heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
+       sheet.append(heading)
+       workbook.save(filepath)
    
    monthly_total(months[int(month)-1], amount, category)   
    
@@ -258,13 +260,7 @@ def load_data():
    if not chart_shown:
       show_chart(True)
 
-# Theme change from dark to light mode
-def toggle_mode():
-     if theme_switch.instate(["selected"]):
-        style.theme_use("forest-light")
-     else:
-           style.theme_use("forest-dark")
-   
+
 # Table item select menu and options
 
 #copy the selected row information to clipboard
@@ -432,11 +428,6 @@ button.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
 
 separator = ttk.Separator(widgets_frame)
 separator.grid(row=6, column=0, padx=(20,10), pady=10, sticky="ew")
-
-# change theme color with toggle_mod function
-theme_switch = ttk.Checkbutton( 
-            widgets_frame, text="Modo", style="Switch", command=toggle_mode)
-theme_switch.grid(row=7, column=0, padx=5, pady=10, sticky="nsew")
 
 
 # selected month data tree view 
