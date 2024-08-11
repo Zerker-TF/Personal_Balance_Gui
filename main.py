@@ -3,10 +3,24 @@ from tkinter import ttk
 from Data_Expenses import create_expense_window
 from Data_Saving import create_savings_window
 
+def resize(event):
+    selected_tab = event.widget.select()
+    tab_text = event.widget.tab(selected_tab, "text")
+
+    if tab_text == "Gastos":
+        root.minsize(1260, 400)
+        root.maxsize(1260, 920)
+    elif tab_text == "Ahorros":
+        root.minsize(1260, 880)
+        root.geometry("1260x880")
+        root.maxsize(1260, 880)
+        
 def main():
+    global root
     root = tk.Tk()
     root.title("Balance Personal")
-    root.minsize(1110,356)
+    root.minsize(1260,400)
+    root.maxsize(1260,880)
     root.grid_rowconfigure(0,weight=1)
     root.columnconfigure(0,weight=1)
     
@@ -24,6 +38,7 @@ def main():
     create_expense_window(frame_gastos)
     create_savings_window(frame_ahorros)
     
+    Ventana.bind("<<NotebookTabChanged>>", resize)
     
     root.mainloop()
     
