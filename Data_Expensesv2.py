@@ -7,15 +7,39 @@ import data_functions as df
 def create_expense_window(root):
     def cargar_month():
         month = month_select.get()
-        df.load_data(month, treeview)
+        df.load_data(month, treeview,graphs)
+        
     def insertar():
         date = exp_date.get()
         category = exp_type.get()
         amount = int(exp_value.get())
         cuota = exp_cuota.get()
         desc = exp_entry.get()
-        df.insert_data(date,category,amount,cuota,desc,treeview)
-    # Table item select menu and options
+        df.insert_data(date,category,amount,cuota,desc,treeview,graphs)
+    
+    def show_menu(event):
+       item = treeview.identify_row(event.y)
+       if item:
+          menu = tk.Menu(treeview, tearoff=0)
+          menu.add_command(label="Copiar",command=lambda: df.copy_row(event,treeview))
+          menu.add_command(label="Editar",command=lambda: df.edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,month_select,treeview))
+          menu.add_command(label="Eliminar",command=lambda: df.delete_row(month_select,treeview))
+          menu.post(event.x_root, event.y_root)
+          treeview.bind("<Button-1>",close_menu)
+          root.bind("<Button-1>",close_menu)
+
+    def close_menu(event):
+       global menu 
+       if menu:
+          menu.unpost()
+          menu = None
+          treeview.unbind("<Button-1>")
+          root.unbind("<Button-1>")
+          
+    #def chart():
+    #    chart_shown = True
+    #    df.show_chart(chart_shown,month_select,graphs)
+    ## Table item select menu and options
 
      #import the tcl file to style the window
     style = ttk.Style(root)
@@ -27,7 +51,7 @@ def create_expense_window(root):
     cuota_list = ["1","3","6","12","18","24","36","48"]
     months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
     cols = ["Fecha","Clasificacion","Monto","Descripcion"]
-    
+    year_list = [str(i) for i in range (2024,datetime.date.today().year + 6)]
     # Top main frames
     frame = ttk.LabelFrame(root,text="Datos")
     frame.pack(side='top',fill='both')
@@ -63,9 +87,12 @@ def create_expense_window(root):
     save_btt = ttk.Button(widgets_frame,text="Guardar",command=insertar)
     separador = ttk.Separator(widgets_frame)
     
-    month_select = ttk.Combobox(button_frame,values=months)
+    month_select = ttk.Combobox(button_frame,values=months,width=9)
+    month_select.insert(0,months[datetime.date.today().month - 1])
     load_month = ttk.Button(button_frame,text="Cargar",command=cargar_month)
-    ver_button = ttk.Button(button_frame,text="Ver")
+    year_select = ttk.Combobox(button_frame,values=year_list,width=5)
+    year_select.insert(0,str(datetime.date.today().year))
+    #ver_button = ttk.Button(button_frame,text="Ver",command=chart)
     
     treeview = ttk.Treeview(tableframe,show="headings", yscrollcommand=tablescroll.set,columns=cols, height=10)
     treeview.column("Fecha", width=100, anchor="center")
@@ -78,6 +105,9 @@ def create_expense_window(root):
     treeview.heading("Descripcion", text="Descripcion", anchor="center")
     treeview.grid(row=1, column=1)
     tablescroll.config(command=treeview.yview)
+    menu = None
+    treeview.bind("<Button-3>",show_menu)
+    
     
     # Placement inside the widget-frame
     exp_date.grid(row=0,column=0, padx=5, pady=5, sticky="ew")
@@ -93,13 +123,13 @@ def create_expense_window(root):
     tablescroll.grid(row=1,column=2,sticky="ns")
     tablescroll.config(command=treeview.yview)
     button_frame.grid(row=0,column=1,pady=5)
-    month_select.grid(row=0,column=0,columnspan=3,sticky="ew",pady=3)
-    load_month.grid(row=1,column=0, sticky="e",padx=0.5)
-    ver_button.grid(row=1,column=2,sticky="w",padx=0.5)
+    month_select.grid(row=0,column=0,sticky="e",pady=3)
+    load_month.grid(row=1,column=0,columnspan=2,ipadx=40)
+    year_select.grid(row=0,column=1,sticky="w",pady=3,padx=3)
+    #ver_button.grid(row=1,column=2,sticky="w",padx=0.5)
     
   
     # Bottom main frame
     graphs = ttk.LabelFrame(root, text="Graficas")
     graphs.pack(side="bottom")
-    test = ttk.Button(graphs,text="test")
-    test.grid(row=0,column=0)
+    

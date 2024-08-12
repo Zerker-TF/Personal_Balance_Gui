@@ -8,13 +8,13 @@ def resize(event):
     tab_text = event.widget.tab(selected_tab, "text")
 
     if tab_text == "Gastos":
-        root.minsize(1260, 400)
-        root.maxsize(1260, 920)
-        root.wm_geometry("1260x410")
+        root.minsize(1260, 410)
+        root.maxsize(1260, 945)
+        #root.wm_geometry("1260x410")
     elif tab_text == "Ahorros":
         root.minsize(1260, 880)
-        root.maxsize(1260, 880)
-        root.wm_geometry("1260x880")
+        root.maxsize(1260, 945)
+        root.wm_geometry("1260x900")
         
 def main():
     global root
