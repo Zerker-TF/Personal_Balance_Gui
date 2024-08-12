@@ -7,7 +7,8 @@ import data_functions as df
 def create_expense_window(root):
     def cargar_month():
         month = month_select.get()
-        df.load_data(month, treeview,graphs)
+        year = year_select.get()
+        df.load_data(month, year,treeview,graphs)
         
     def insertar():
         date = exp_date.get()
@@ -15,7 +16,8 @@ def create_expense_window(root):
         amount = int(exp_value.get())
         cuota = exp_cuota.get()
         desc = exp_entry.get()
-        df.insert_data(date,category,amount,cuota,desc,treeview,graphs)
+        year = year_select.get()
+        df.insert_data(date,category,amount,cuota,desc,year,treeview,graphs)
     
     def show_menu(event):
        item = treeview.identify_row(event.y)
@@ -92,7 +94,7 @@ def create_expense_window(root):
     load_month = ttk.Button(button_frame,text="Cargar",command=cargar_month)
     year_select = ttk.Combobox(button_frame,values=year_list,width=5)
     year_select.insert(0,str(datetime.date.today().year))
-    #ver_button = ttk.Button(button_frame,text="Ver",command=chart)
+    
     
     treeview = ttk.Treeview(tableframe,show="headings", yscrollcommand=tablescroll.set,columns=cols, height=10)
     treeview.column("Fecha", width=100, anchor="center")
@@ -126,7 +128,7 @@ def create_expense_window(root):
     month_select.grid(row=0,column=0,sticky="e",pady=3)
     load_month.grid(row=1,column=0,columnspan=2,ipadx=40)
     year_select.grid(row=0,column=1,sticky="w",pady=3,padx=2)
-    #ver_button.grid(row=1,column=2,sticky="w",padx=0.5)
+   
     
   
     # Bottom main frame

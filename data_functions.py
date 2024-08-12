@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pyperclip
 
-def load_data(month, treeview,graphs):
+def load_data(month,year, treeview,graphs):
     
     months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
    
@@ -37,6 +37,9 @@ def load_data(month, treeview,graphs):
         sheet = workbook.active
     
     list_values = [list(row) for row in sheet.values]
+    # Filter the data based on the selected year
+    list_values = [row for row in list_values[1:] if str(row[0]).split('-')[0] == year]
+    
     #Sort by date
     for i, row in enumerate(list_values[1:]):
         if isinstance(row[0],str):
@@ -45,16 +48,19 @@ def load_data(month, treeview,graphs):
             list_values[i+1][0] = row[0].date()
     
     list_values[1:] = sorted(list_values[1:], key=lambda x: x[0])
+   
     for item in treeview.get_children():
         treeview.delete(item)
-    for row in list_values[1:]:
-        treeview.insert("","end",values=row[0:])
     
-    show_chart(True,month,graphs) 
+    for row in list_values[0:]:
+        
+        treeview.insert("","end",values=row[0:4])
+    
+    show_chart(True,month,year,graphs) 
         
     pass
 
-def insert_data(exp_date,category,amount,cuota,desc,treeview,graphs):
+def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs):
     months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
     
     date_obj = datetime.datetime.strptime(exp_date, "%m/%d/%y")
@@ -105,7 +111,7 @@ def insert_data(exp_date,category,amount,cuota,desc,treeview,graphs):
     workbook.save(filepath)
 
     treeview.insert("","end",values=[date,category,amount,desc if desc else " "])
-    show_chart(True,month,graphs) 
+    show_chart(True,month,year_select,graphs) 
     pass
 
 def copy_row(event,treeview):
@@ -193,7 +199,7 @@ def delete_row(month_select,treeview):
     load_data()
     pass
  
-def show_chart(chart_shown,month_select,graphframe):
+def show_chart(chart_shown,month_select,year,graphframe):
        global  canvas, pie_canvas
        colors = {
 
@@ -235,6 +241,9 @@ def show_chart(chart_shown,month_select,graphframe):
           sheet = workbook.active
     
         data = list(sheet.values)
+        # Filter the data based on the selected year
+
+        data = [row for row in data if str(row[0]).split('-')[0] == year]
         categorias =["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra"]
     
         
