@@ -87,7 +87,7 @@ def create_expense_window(root):
     save_btt = ttk.Button(widgets_frame,text="Guardar",command=insertar)
     separador = ttk.Separator(widgets_frame)
     
-    month_select = ttk.Combobox(button_frame,values=months,width=9)
+    month_select = ttk.Combobox(button_frame,values=months,width=10)
     month_select.insert(0,months[datetime.date.today().month - 1])
     load_month = ttk.Button(button_frame,text="Cargar",command=cargar_month)
     year_select = ttk.Combobox(button_frame,values=year_list,width=5)
@@ -125,7 +125,7 @@ def create_expense_window(root):
     button_frame.grid(row=0,column=1,pady=5)
     month_select.grid(row=0,column=0,sticky="e",pady=3)
     load_month.grid(row=1,column=0,columnspan=2,ipadx=40)
-    year_select.grid(row=0,column=1,sticky="w",pady=3,padx=3)
+    year_select.grid(row=0,column=1,sticky="w",pady=3,padx=2)
     #ver_button.grid(row=1,column=2,sticky="w",padx=0.5)
     
   
