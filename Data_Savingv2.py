@@ -3,14 +3,32 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import simpledialog
 from datetime import datetime, date
-
+import savings_functions as sf
 
 def create_savings_window(root):
-
+    def new_ahorro():
+        ahorro_name = ahorro_select.get()
+        if ahorro_name == "Nuevo Ahorro":
+            sf.new_ahorro(ahorro_name,ahorro_amount,ahorro_final,charts_frame,canvas_scroll)
+        else:
+            sf.new_ahorro(ahorro_name,ahorro_amount,None,charts_frame,canvas_scroll)
+        #We update the combobox
+        ahorros = sf.ahorros_list()
+        ahorro_select['values'] = ["Nuevo Ahorro"] + ahorros
+        ahorro_table['values'] = ahorros
+        pass
+    
+    def tabla():
+        #nonlocal treeview
+        item = ahorro_table.get()
+        sf.insert_table(item,treeview)
+        pass
+    
+    
     style = ttk.Style(root)
     style.theme_use("forest-dark")
 
-    lista_ahorros = ["test"]
+    lista_ahorros = sf.ahorros_list()
     
     # Frames
 
@@ -37,23 +55,24 @@ def create_savings_window(root):
     charts_frame = ttk.Frame(canvas_scroll)
     canvas_scroll.create_window((0, 0), window=charts_frame, anchor="nw")
     
+    charts_frame.bind("<Configure>",lambda e: canvas_scroll.configure(scrollregion=canvas_scroll.bbox("all")))
+    
     visual_frame = ttk.Frame(frame)
     visual_frame.grid(row=0, column=1, padx=20, pady=20, sticky="nsew")
     
     visual_frame_buttons = ttk.Frame(visual_frame)
     visual_frame_buttons.grid(row=0,column=0,sticky="w")
     
-    frame.columnconfigure(1, weight=15)
-    frame.rowconfigure(0, weight=1)
+    frame.columnconfigure(1, weight=10)
     frame.rowconfigure(1, weight=1)
-    frame.rowconfigure(1, weight=1)
-    frame.columnconfigure(0, weight=1)
+    charts_container.columnconfigure(0,weight=1)
+    charts_container.rowconfigure(1,weight=1)
     visual_frame.columnconfigure(0, weight=1)
     visual_frame.rowconfigure(2, weight=1)
     
     # Widgets
     
-    ahorro_select = ttk.Combobox(widgets_frame1, values=["Nuevo Ahorro"])
+    ahorro_select = ttk.Combobox(widgets_frame1, values=["Nuevo Ahorro"] + lista_ahorros)
     ahorro_select.insert(0, "Seleccionar ahorro")
     ahorro_select.current(0)
 
@@ -65,7 +84,7 @@ def create_savings_window(root):
     ahorro_final.insert(0, "Objetivo")
     ahorro_final.bind("<FocusIn>", lambda e: ahorro_final.delete('0', 'end'))
     
-    new_savings_button = ttk.Button(widgets_frame1, text="Guardar")
+    new_savings_button = ttk.Button(widgets_frame1, text="Guardar",command=new_ahorro)
     
     separator = ttk.Separator(widgets_frame1)
     
@@ -98,7 +117,7 @@ def create_savings_window(root):
     ahorro_table.insert(0, "Seleccionar ahorro")
     ahorro_table.grid(row=0, column=0, padx=0.5, pady=2, sticky="w")
 
-    table_button = ttk.Button(visual_frame_buttons, text="Ver Tabla")
+    table_button = ttk.Button(visual_frame_buttons, text="Ver Tabla",command=lambda: tabla())
     table_button.grid(row=0, column=1, padx=0.5, pady=2, sticky="w")
 
     columns = ("Fecha", "Monto Ahorrado", "Objetivo")
@@ -112,4 +131,4 @@ def create_savings_window(root):
     treeview.grid(row=2, column=0, columnspan=2, padx=5, sticky="nsew")
     treeview.columnconfigure(0,weight=1)
 
-   
+    sf.update_charts(charts_frame,canvas_scroll)

@@ -9,7 +9,7 @@ def resize(event):
 
     if tab_text == "Gastos":
         root.minsize(1260, 410)
-        root.maxsize(1260, 945)
+        root.maxsize(1260, 950)
         #root.wm_geometry("1260x410")
     elif tab_text == "Ahorros":
         root.minsize(1260, 880)
