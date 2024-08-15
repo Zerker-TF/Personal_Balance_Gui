@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkcalendar import Calendar, DateEntry
 import datetime
-import data_functions as df
+import expense_functions as df
 
 def create_expense_window(root):
     def cargar_month():
@@ -38,12 +38,8 @@ def create_expense_window(root):
           treeview.unbind("<Button-1>")
           root.unbind("<Button-1>")
           
-    #def chart():
-    #    chart_shown = True
-    #    df.show_chart(chart_shown,month_select,graphs)
-    ## Table item select menu and options
 
-     #import the tcl file to style the window
+    #import the tcl file to style the window
     style = ttk.Style(root)
     root.tk.call("source", "forest-dark.tcl")
     style.theme_use("forest-dark")
@@ -65,8 +61,7 @@ def create_expense_window(root):
     tableframe.grid(row=0, column=1,columnspan=3,padx=90,pady=5)
     tablescroll = ttk.Scrollbar(tableframe) #Scrollbar
     button_frame = ttk.Frame(tableframe)  
-    
- 
+     
     # Top Frame widgets
     
     exp_date = DateEntry(widgets_frame)
@@ -110,7 +105,6 @@ def create_expense_window(root):
     menu = None
     treeview.bind("<Button-3>",show_menu)
     
-    
     # Placement inside the widget-frame
     exp_date.grid(row=0,column=0, padx=5, pady=5, sticky="ew")
     exp_type.grid(row=1,column=0,padx=5,pady=5,sticky="ew")
@@ -129,9 +123,9 @@ def create_expense_window(root):
     load_month.grid(row=1,column=0,columnspan=2,ipadx=40)
     year_select.grid(row=0,column=1,sticky="w",pady=3,padx=2)
    
-    
-  
     # Bottom main frame
     graphs = ttk.LabelFrame(root, text="Graficas")
     graphs.pack(side="bottom")
+    
+    cargar_month()
     
