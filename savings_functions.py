@@ -17,42 +17,50 @@ def ahorros_list():
                 ahorros.append(row[0])
         return ahorros
 
-def new_ahorro(ahorro_select,ahorro_amount,ahorro_final,charts_frame,canvas_scroll):
-    if ahorro_select == "Nuevo Ahorro":
-        new_ahorro_name = simpledialog.askstring("Nuevo Ahorro", "Ingrese el nombre y ingrese los valores")
-        if new_ahorro_name is not None:
-            ahorro_select.set(new_ahorro_name)
-            
-            ahorro_amount.focus_set()
-        else:
-            messagebox.showerror("Error", "Debe ingresar un nombre para continuar.")
-        return
+def new_ahorro(ahorro_select, ahorro_amount, ahorro_final, charts_frame, canvas_scroll):
+    
     filepath = "./Gastos.xlsx"
     workbook = openpyxl.load_workbook(filepath)
     sheet = workbook["Ahorros"]
     ahorro_name = ahorro_select
+    
     try:
         amount_added = float(ahorro_amount)
         objective = float(ahorro_final)
+        
+        # Busca el ahorro existente y actualiza el monto total
+        updated = False
+        for row in sheet.iter_rows(min_row=2):
+            if row[0].value == ahorro_name:
+                # Suma el monto agregado al total guardado
+                total_amount = row[1].value + amount_added
+                sheet.cell(row=row[0].row, column=2, value=total_amount)  # Actualiza el monto total en la hoja
+                sheet.cell(row=row[0].row, column=5, value=amount_added)  # Registra el monto agregado en la última columna
+                updated = True
+                break
+            
+        # Si no existe un registro previo, crea uno nuevo
+        if not updated:
+            sheet.append([ahorro_name, amount_added, objective, date.today(), amount_added])
+        
     except ValueError:
         messagebox.showerror("Error", "Debe ingresar valores numéricos válidos.")
         return
-    for row in sheet.iter_rows(min_row=2, values_only=True):
-        if row[0] == ahorro_name:
-            total_amount = row[1] + amount_added
-            sheet.append([ahorro_name, total_amount, objective, date.today(), amount_added])
-            break
-    else:
-        sheet.append([ahorro_name, amount_added, objective, date.today(), amount_added])
+    
     workbook.save(filepath)
     
-    update_charts(charts_frame,canvas_scroll)  
+    # Actualiza los gráficos
+    update_charts(charts_frame, canvas_scroll)
+
 
     
 def get_values():
     filepath = "./Gastos.xlsx"
     workbook = openpyxl.load_workbook(filepath)
     sheet = workbook["Ahorros"]
+    if sheet.max_row == 1:  # Check if the sheet is empty (only header row)
+        
+        return
     ahorros = []
     amounts_saved = []
     objectives = []
@@ -82,10 +90,20 @@ def clear_charts(charts_frame):
         widget.destroy()
 
 def update_charts(charts_frame,canvas_scroll):
+    filepath = "./Gastos.xlsx"
+    workbook = openpyxl.load_workbook(filepath)
+    sheet = workbook["Ahorros"]
+    if sheet.max_row == 1:  # Check if the sheet is empty (only header row)
+        
+        return    
     clear_charts(charts_frame)
     ahorros, amounts_saved, objectives, dates = get_values()
     fig, axs = plt.subplots(len(ahorros), 1, figsize=(12, 1.1 * len(ahorros)))
     fig.suptitle('Listado de Ahorros', color="#bfbfbf")
+    
+    if len(ahorros) == 1:
+        axs = [axs]
+    
     for i, (ahorro, amount_saved, objective) in enumerate(zip(ahorros, amounts_saved, objectives)):
         axs[i].barh(0, amount_saved, height=0.3, color='#84b86d')
         axs[i].get_yaxis().set_visible(False)
@@ -102,8 +120,14 @@ def update_charts(charts_frame,canvas_scroll):
         axs[i].set_xticks([0, objective])
         axs[i].set_title(ahorro, fontsize=10, loc='left', fontstyle='italic', fontweight='book',
                          bbox=dict(facecolor='#b6d7a8', edgecolor='black', boxstyle='round,pad=0.5'))
-        axs[i].text(0.95, 0.98, f"Restante: ${int(objective - amount_saved):,}", ha="right", va="center",
+        if objective-amount_saved > 0:
+            axs[i].text(0.95, 0.98, f"Restante: ${int(objective - amount_saved):,}", ha="right", va="center",
                     fontweight='bold', color='black', fontsize=9,
+                    bbox=dict(facecolor='#bac4c1', edgecolor='black', boxstyle='round,pad=0.5'),
+                    transform=axs[i].transAxes)
+        else:
+            axs[i].text(0.95, 0.98, f"Excedente: ${int(amount_saved-objective):,}", ha="right", va="center",
+                    fontweight='bold', color='#309651', fontsize=9,
                     bbox=dict(facecolor='#bac4c1', edgecolor='black', boxstyle='round,pad=0.5'),
                     transform=axs[i].transAxes)
     fig.tight_layout()

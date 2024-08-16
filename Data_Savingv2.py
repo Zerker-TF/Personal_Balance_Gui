@@ -4,19 +4,31 @@ from tkinter import messagebox
 from tkinter import simpledialog
 from datetime import datetime, date
 import savings_functions as sf
+import openpyxl
 
 def create_savings_window(root):
     def new_ahorro():
         ahorro_name = ahorro_select.get()
+        # Compara el valor seleccionado correctamente
         if ahorro_name == "Nuevo Ahorro":
-            sf.new_ahorro(ahorro_name,ahorro_amount,ahorro_final,charts_frame,canvas_scroll)
+            # Abre el diálogo para ingresar el nuevo ahorro
+            new_ahorro_name = simpledialog.askstring("Nuevo Ahorro", "Ingrese el nombre y los valores")
+            if new_ahorro_name is not None:
+                # Actualiza el Combobox con el nuevo nombre
+                ahorro_select.set(new_ahorro_name)
+                ahorro_amount.focus_set()
+            else:
+                messagebox.showerror("Error", "Debe ingresar un nombre para continuar.")
+                return
         else:
-            sf.new_ahorro(ahorro_name,ahorro_amount,None,charts_frame,canvas_scroll)
-        #We update the combobox
-        ahorros = sf.ahorros_list()
-        ahorro_select['values'] = ["Nuevo Ahorro"] + ahorros
-        ahorro_table['values'] = ahorros
-        pass
+            # Si no es "Nuevo Ahorro", llama a la función correspondiente
+            sf.new_ahorro(ahorro_name, ahorro_amount.get(), ahorro_final.get(), charts_frame, canvas_scroll)
+            # Actualiza los valores en la Combobox
+            ahorros = sf.ahorros_list()
+            ahorro_select['values'] = ["Nuevo Ahorro"] + ahorros
+            ahorro_table['values'] = ahorros
+
+             
     
     def tabla():
         #nonlocal treeview
@@ -24,6 +36,39 @@ def create_savings_window(root):
         sf.insert_table(item,treeview)
         pass
     
+    def update_objective(event):
+       
+       selected_ahorro = ahorro_select.get()
+    
+       if selected_ahorro != "Nuevo Ahorro": 
+            # Grab the objective for the selected ahorro from the Excel file
+            filepath = "./Gastos.xlsx"
+            workbook = openpyxl.load_workbook(filepath)
+            sheet = workbook["Ahorros"]
+
+            ahorro_final_value = None  # Default value
+
+            # Loop through the rows to find the corresponding ahorro
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                if row[0] == selected_ahorro:  # Compare with selected ahorro
+                    ahorro_final_value = row[2]  
+                    break
+                
+            # Update the ahorro_final entry
+            ahorro_final.delete(0, tk.END)
+            if ahorro_final_value is not None:
+                ahorro_final.insert(0, ahorro_final_value)
+                
+                return float(ahorro_final_value)
+            else:
+                ahorro_final.insert(0, "Objetivo no encontrado")
+                return 0
+
+       else:
+            # Reset the ahorro_final entry if "Nuevo Ahorro" is selected
+            ahorro_final.delete(0, tk.END)
+            ahorro_final.insert(0, "Objetivo")
+            return 0
     
     style = ttk.Style(root)
     style.theme_use("forest-dark")
@@ -71,10 +116,12 @@ def create_savings_window(root):
     visual_frame.rowconfigure(2, weight=1)
     
     # Widgets
+    ahorro_final_value = 0
     
     ahorro_select = ttk.Combobox(widgets_frame1, values=["Nuevo Ahorro"] + lista_ahorros)
     ahorro_select.insert(0, "Seleccionar ahorro")
     ahorro_select.current(0)
+    ahorro_select.bind("<<ComboboxSelected>>", update_objective)
 
     ahorro_amount = ttk.Entry(widgets_frame1)
     ahorro_amount.insert(0, "Ingrese el monto a reservar")
@@ -83,8 +130,11 @@ def create_savings_window(root):
     ahorro_final = ttk.Entry(widgets_frame1)
     ahorro_final.insert(0, "Objetivo")
     ahorro_final.bind("<FocusIn>", lambda e: ahorro_final.delete('0', 'end'))
-    
-    new_savings_button = ttk.Button(widgets_frame1, text="Guardar",command=new_ahorro)
+    if ahorro_final_value != 0:
+        print(ahorro_final_value)
+        ahorro_final = ahorro_final_value
+        
+    new_savings_button = ttk.Button(widgets_frame1, text="Guardar",command= new_ahorro)
     
     separator = ttk.Separator(widgets_frame1)
     
