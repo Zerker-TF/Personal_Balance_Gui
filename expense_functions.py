@@ -9,26 +9,10 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pyperclip
 
 def load_data(month,year, treeview,graphs):
-    
-    months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
-   
+  
     filepath = "./Gastos.xlsx"
     
-    if not os.path.exists(filepath):
-        workbook = openpyxl.Workbook()
-        workbook.remove(workbook.active)
-        
-        ahorros_sheet = workbook.create_sheet(title="Ahorros",index=0)
-        ahorros_heading = ["Fecha","Nombre","Total","Objetivo","Monto agregado"]
-        ahorros_sheet.append(ahorros_heading)
-        
-        
-        for name in months:
-            sheet = workbook.create_sheet(title=name)
-            heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
-            sheet.append(heading)
-        workbook.save(filepath)
-    
+   
     workbook = openpyxl.load_workbook(filepath)
     
     try:
@@ -71,22 +55,7 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
     months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
    
     filepath = "./Gastos.xlsx"
-    
-    if not os.path.exists(filepath):
-        workbook = openpyxl.Workbook()
-        workbook.remove(workbook.active)
         
-        ahorros_sheet = workbook.create_sheet(title="Ahorros",index=0)
-        ahorros_heading = ["Fecha","Nombre","Total","Objetivo","Monto agregado"]
-        ahorros_sheet.append(ahorros_heading)
-        
-        
-        for name in months:
-            sheet = workbook.create_sheet(title=name)
-            heading = ["Fecha","Categoria","Monto","Descripcion","Cuotas"]
-            sheet.append(heading)
-        workbook.save(filepath)
-    
     workbook = openpyxl.load_workbook(filepath)
     
    # calculate cuotas
@@ -169,7 +138,7 @@ def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,month_select,treevi
     workbook.save(filepath)
     pass
  
-def delete_row(month_select,treeview):
+def delete_row(month_select,treeview,year,graphs):
     selected_item = treeview.selection()[0]
     row_values = treeview.item(selected_item, 'values')
     date = row_values[0]
@@ -196,7 +165,7 @@ def delete_row(month_select,treeview):
              sheet.delete_rows(i+1)
              break
     workbook.save(filepath)    
-    load_data()
+    load_data(month_select,year,treeview,graphs)
     pass
  
  
