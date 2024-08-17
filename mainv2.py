@@ -18,7 +18,7 @@ def resize(event):
         root.wm_geometry("1260x900")
 
 def initialize_sheets():
-    filepath = "./Gastos.xlxs"
+    filepath = "./Gastos.xlsx"
     months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
     if not os.path.exists(filepath):
      workbook = openpyxl.Workbook()

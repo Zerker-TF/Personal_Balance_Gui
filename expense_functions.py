@@ -37,12 +37,12 @@ def load_data(month,year, treeview,graphs):
         treeview.delete(item)
     
     for row in list_values[0:]:
-        
+        row = [" " if value is None else value for value in row]
         treeview.insert("","end",values=row[0:4])
     
     show_chart(True,month,year,graphs) 
         
-    pass
+   
 
 def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs):
     months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
@@ -51,9 +51,7 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
     date = date_obj.strftime("%Y-%m-%d")
     month = date[5:7]
     year = int(date[:4])
-        
-   
-   
+ 
     filepath = "./Gastos.xlsx"
         
     workbook = openpyxl.load_workbook(filepath)
@@ -80,8 +78,9 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
     workbook.save(filepath)
 
     treeview.insert("","end",values=[date,category,amount,desc if desc else " "])
-    show_chart(True,month,year_select,graphs) 
-    pass
+    month_select = months[int(month)-1]
+    show_chart(True,month_select,year_select,graphs) 
+  
 
 def copy_row(event,treeview):
     selected_item = treeview.selection()
@@ -99,7 +98,7 @@ def copy_row(event,treeview):
              pyperclip.copy("\t".join(non_empty_values))
     else:
           messagebox.showwarning('ERROR', 'Por favor, seleccione un dato primero y vuelva a intentarlo!')
-    pass
+    
 
 def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,month_select,treeview):
     selected_item = treeview.selection()[0]
@@ -136,7 +135,7 @@ def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,month_select,treevi
              sheet.delete_rows(i+1)
              break
     workbook.save(filepath)
-    pass
+    
  
 def delete_row(month_select,treeview,year,graphs):
     selected_item = treeview.selection()[0]
@@ -166,11 +165,12 @@ def delete_row(month_select,treeview,year,graphs):
              break
     workbook.save(filepath)    
     load_data(month_select,year,treeview,graphs)
-    pass
+    
  
  
 def show_chart(chart_shown,month_select,year,graphframe):
        global  canvas, pie_canvas
+       
        colors = {
 
         "Comida": ['#4CAF50', '#2E865F'],
@@ -197,9 +197,11 @@ def show_chart(chart_shown,month_select,year,graphframe):
     
        if chart_shown:
 
+       
         # Set the active sheet based on the selected month
         filepath = "./Gastos.xlsx"
         workbook = openpyxl.load_workbook(filepath)
+       
         if isinstance(month_select,str):
          selected_month = month_select
         else:
@@ -209,10 +211,12 @@ def show_chart(chart_shown,month_select,year,graphframe):
           sheet = workbook[selected_month]
         except KeyError:
           sheet = workbook.active
-    
+        
+        if sheet.max_row < 2:
+           return
         data = list(sheet.values)
         # Filter the data based on the selected year
-
+     
         data = [row for row in data if str(row[0]).split('-')[0] == year]
         categorias =["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra"]
     
@@ -278,7 +282,7 @@ def show_chart(chart_shown,month_select,year,graphframe):
         canvas = FigureCanvasTkAgg(figure, master=graphframe)
         canvas.draw()
         canvas.get_tk_widget().grid(row=0, column=0)
-
+        
         # pctdistance moves the label x amount from the center to the outside
         ax2.pie(pie_amounts, autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=0.75, radius=0.8,textprops={'fontsize':10, 'fontweight': 'bold'}  ,colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#ff7f50', '#d11141', '#808080'], labels=pie_categorias)
         ax2.axis('equal')
@@ -303,4 +307,4 @@ def show_chart(chart_shown,month_select,year,graphframe):
         # Resize window when chart is shown
         graphframe.grid_rowconfigure(0, weight=1)
         graphframe.grid_columnconfigure(0, weight=1)    
-        pass
+     
