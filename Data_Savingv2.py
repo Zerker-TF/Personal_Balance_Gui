@@ -22,6 +22,12 @@ def create_savings_window(root):
                 return
         else:
             # Si no es "Nuevo Ahorro", llama a la función correspondiente
+            try:
+                test = float(ahorro_amount.get())
+                test2 = float(ahorro_final.get())
+            except ValueError:
+                messagebox.showerror("Error","Inserte un valor numerico valido")
+                return
             sf.new_ahorro(ahorro_name, ahorro_amount.get(), ahorro_final.get(), charts_frame, canvas_scroll)
             # Actualiza los valores en la Combobox
             ahorros = sf.ahorros_list()
@@ -72,7 +78,11 @@ def create_savings_window(root):
     
     def retirar_ahorro():
         name = ahorro_select2.get()
-        amount = ahorro_amount2.get()
+        try:
+            amount = float(ahorro_amount2.get())
+        except ValueError:
+            messagebox.showerror("Error","Ingrese un monto valido")
+            return
         sf.retirar_ahorro(name,amount,charts_frame,canvas_scroll)
         pass
     
@@ -127,6 +137,7 @@ def create_savings_window(root):
     ahorro_select = ttk.Combobox(widgets_frame1, values=["Nuevo Ahorro"] + lista_ahorros)
     ahorro_select.insert(0, "Seleccionar ahorro")
     ahorro_select.current(0)
+    ahorro_select.state(["readonly"])
     ahorro_select.bind("<<ComboboxSelected>>", update_objective)
 
     ahorro_amount = ttk.Entry(widgets_frame1)
@@ -146,6 +157,7 @@ def create_savings_window(root):
     
     ahorro_select2 = ttk.Combobox(widgets_frame2, values=lista_ahorros)
     ahorro_select2.insert(0, "Seleccionar ahorro")
+    ahorro_select2.state(["readonly"])
     
     ahorro_amount2 = ttk.Entry(widgets_frame2)
     ahorro_amount2.insert(0, "Ingrese el monto a retirar")
@@ -171,6 +183,7 @@ def create_savings_window(root):
     
     ahorro_table = ttk.Combobox(visual_frame_buttons, values=lista_ahorros)
     ahorro_table.insert(0, "Seleccionar ahorro")
+    ahorro_table.state(["readonly"])
     ahorro_table.grid(row=0, column=0, padx=0.5, pady=2, sticky="w")
 
     table_button = ttk.Button(visual_frame_buttons, text="Ver Tabla",command=lambda: tabla())

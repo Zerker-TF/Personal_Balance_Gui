@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkcalendar import Calendar, DateEntry
 import datetime
 import expense_functions as df
+from tkinter import messagebox
 
 def create_expense_window(root):
     def cargar_month():
@@ -11,9 +12,14 @@ def create_expense_window(root):
         df.load_data(month, year,treeview,graphs)
         
     def insertar():
+        try: 
+            amount = int(exp_value.get())
+        except ValueError:
+          messagebox.showerror("Error","Por favor ingrese un monto valido")
+          return
         date = exp_date.get()
         category = exp_type.get()
-        amount = int(exp_value.get())
+  
         cuota = exp_cuota.get()
         desc = exp_entry.get()
         year = year_select.get()
@@ -70,6 +76,7 @@ def create_expense_window(root):
     
     exp_type = ttk.Combobox(widgets_frame,values=combo_list)
     exp_type.insert(0,"Clasificacion")
+    exp_type.state(["readonly"])
     
     exp_value = ttk.Entry(widgets_frame)
     exp_value.insert(0,"Monto")
@@ -81,15 +88,20 @@ def create_expense_window(root):
     
     exp_cuota = ttk.Combobox(widgets_frame,values=cuota_list)
     exp_cuota.insert(0,"Cuotas")
+    exp_cuota.state(["readonly"])
         
     save_btt = ttk.Button(widgets_frame,text="Guardar",command=insertar)
     separador = ttk.Separator(widgets_frame)
     
     month_select = ttk.Combobox(button_frame,values=months,width=10)
     month_select.insert(0,months[datetime.date.today().month - 1])
+    month_select.state(["readonly"])
+    
     load_month = ttk.Button(button_frame,text="Cargar",command=cargar_month)
+    
     year_select = ttk.Combobox(button_frame,values=year_list,width=5)
     year_select.insert(0,str(datetime.date.today().year))
+    year_select.state(["readonly"])
     
     
     treeview = ttk.Treeview(tableframe,show="headings", yscrollcommand=tablescroll.set,columns=cols, height=10)
