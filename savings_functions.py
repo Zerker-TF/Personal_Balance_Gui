@@ -4,8 +4,10 @@ from tkinter import messagebox
 from tkinter import simpledialog
 import openpyxl
 from datetime import datetime, date
+import calendar
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 
 def ahorros_list():
         filepath = "./Gastos.xlsx"
@@ -41,7 +43,7 @@ def new_ahorro(ahorro_select, ahorro_amount, ahorro_final, charts_frame, canvas_
             
         # Si no existe un registro previo, crea uno nuevo
         if not updated:
-            sheet.append([ahorro_name, amount_added, objective, date.today(), amount_added])
+            sheet.append([ahorro_name, amount_added, objective, date.today().strftime("%Y-%m-%d"), amount_added])
         
     except ValueError:
         messagebox.showerror("Error", "Debe ingresar valores numéricos válidos.")
@@ -149,3 +151,54 @@ def insert_table(selected_item,treeview):
     for row in sheet.iter_rows(min_row=2, values_only=True):
         if row[0] == selected_item:
             treeview.insert("", "end", values=(row[3], row[1], row[2]))
+            
+def retirar_ahorro(ahorro_select, amount_withdraw,charts_frame, canvas_scroll):
+    filepath = "./Gastos.xlsx"
+    workbook = openpyxl.load_workbook(filepath)
+    sheet = workbook["Ahorros"]
+    ahorro_name = ahorro_select
+    
+    try:
+        amount_withdraw = float(amount_withdraw)
+        
+        # Busca el ahorro existente y actualiza el monto total
+        updated = False
+        for row in sheet.iter_rows(min_row=2):
+            if row[0].value == ahorro_name:
+                current_amount = row[1].value
+                
+                if current_amount < amount_withdraw:
+                    messagebox.showerror("Error", "No puedes retirar más de lo ahorrado.")
+                    return
+                new_amount = current_amount - amount_withdraw
+                
+                sheet.cell(row=row[0].row, column=2, value=new_amount)  # Actualiza el monto total en la hoja
+                updated = True
+                break
+        
+        if not updated:
+            messagebox.showerror("Error", "Ahorro no encontrado.")
+            return
+        
+        # Si el monto final es 0, muestra un mensaje de aviso
+        if new_amount == 0:
+            response = messagebox.askyesnocancel("Aviso", f"El ahorro '{ahorro_name}' se ha vaciado. ¿Desea eliminarlo?")
+            if response:
+                # Elimina el ahorro de la lista y el Excel
+                sheet.delete_rows(row[0].row)
+                workbook.save(filepath)
+        
+        # Envía el monto retirado a la sheet del mes actual como categoría ingreso
+        months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+        month_name = months[datetime.now().month - 1]
+        current_month_sheet = workbook[month_name]
+        current_month_sheet.append([date.today(), "Ingreso",amount_withdraw,ahorro_name, 1])
+        
+        workbook.save(filepath)
+        
+        # Actualiza los gráficos
+        update_charts(charts_frame, canvas_scroll)
+    
+    except ValueError:
+        messagebox.showerror("Error", "Debe ingresar un valor numérico válido.")
+        return

@@ -70,6 +70,12 @@ def create_savings_window(root):
             ahorro_final.insert(0, "Objetivo")
             return 0
     
+    def retirar_ahorro():
+        name = ahorro_select2.get()
+        amount = ahorro_amount2.get()
+        sf.retirar_ahorro(name,amount,charts_frame,canvas_scroll)
+        pass
+    
     style = ttk.Style(root)
     style.theme_use("forest-dark")
 
@@ -145,7 +151,7 @@ def create_savings_window(root):
     ahorro_amount2.insert(0, "Ingrese el monto a retirar")
     ahorro_amount2.bind("<FocusIn>", lambda e: ahorro_amount2.delete('0', 'end'))
    
-    savings_retirar = ttk.Button(widgets_frame2, text="Retirar")
+    savings_retirar = ttk.Button(widgets_frame2, text="Retirar", command= retirar_ahorro)
     separator2 = ttk.Separator(widgets_frame2)
 
     # Top side widget placement

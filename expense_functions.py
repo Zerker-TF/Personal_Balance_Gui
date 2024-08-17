@@ -52,7 +52,7 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
     month = date[5:7]
     year = int(date[:4])
         
-    months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+   
    
     filepath = "./Gastos.xlsx"
         
