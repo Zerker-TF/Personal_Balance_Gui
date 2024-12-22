@@ -46,10 +46,6 @@ def create_expense_window(root):
           root.unbind("<Button-1>")
           
 
-    #import the tcl file to style the window
-    style = ttk.Style(root)
-    root.tk.call("source", "forest-dark.tcl")
-    style.theme_use("forest-dark")
 
     #types of expenses
     combo_list = ["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra","Ingresos","Ahorros"]

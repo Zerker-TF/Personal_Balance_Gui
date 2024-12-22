@@ -8,40 +8,45 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pyperclip
 
-def load_data(month,year, treeview,graphs):
-  
-    filepath = "./Gastos.xlsx"
-    
+#def load_data(month,year, treeview,graphs):
+#  
+#    filepath = "./Gastos.xlsx"
+#    
+#   
+#    workbook = openpyxl.load_workbook(filepath)
+#    
+#    try:
+#        sheet = workbook[month]
+#    except KeyError:
+#        sheet = workbook.active
+#    
+#    list_values = [list(row) for row in sheet.values]
+#    # Filter the data based on the selected year
+#    list_values = [row for row in list_values[1:] if str(row[0]).split('-')[0] == year]
+#    
+#    #Sort by date
+#    for i, row in enumerate(list_values[1:]):
+#        if isinstance(row[0],str):
+#            list_values[i+1][0] = datetime.datetime.strptime(row[0], "%Y-%m-%d").date()
+#        elif isinstance (row[0], datetime.datetime):
+#            list_values[i+1][0] = row[0].date()
+#    
+#    list_values[1:] = sorted(list_values[1:], key=lambda x: x[0])
+#   
+#    for item in treeview.get_children():
+#        treeview.delete(item)
+#    
+#    for row in list_values[0:]:
+#        row = [" " if value is None else value for value in row]
+#        treeview.insert("","end",values=row[0:4])
+#    
+#    show_chart(True,month,year,graphs) 
+
+def load_data(month, year, treeview, graphs):
    
-    workbook = openpyxl.load_workbook(filepath)
-    
-    try:
-        sheet = workbook[month]
-    except KeyError:
-        sheet = workbook.active
-    
-    list_values = [list(row) for row in sheet.values]
-    # Filter the data based on the selected year
-    list_values = [row for row in list_values[1:] if str(row[0]).split('-')[0] == year]
-    
-    #Sort by date
-    for i, row in enumerate(list_values[1:]):
-        if isinstance(row[0],str):
-            list_values[i+1][0] = datetime.datetime.strptime(row[0], "%Y-%m-%d").date()
-        elif isinstance (row[0], datetime.datetime):
-            list_values[i+1][0] = row[0].date()
-    
-    list_values[1:] = sorted(list_values[1:], key=lambda x: x[0])
    
-    for item in treeview.get_children():
-        treeview.delete(item)
-    
-    for row in list_values[0:]:
-        row = [" " if value is None else value for value in row]
-        treeview.insert("","end",values=row[0:4])
-    
-    show_chart(True,month,year,graphs) 
-        
+   
+   show_chart(True,month,year,graphs)
    
 
 def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs):
