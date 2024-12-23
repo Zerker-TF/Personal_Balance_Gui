@@ -10,17 +10,30 @@ import pyperclip
 
 
 
+
 def load_data(month, year, treeview, graphs):
    conn = sqlite3.connect("./Gastos.db")
    cursor = conn.cursor()
+   
+   month_number = {
+          "Enero":"01", "Febrero":"02", "Marzo": "03","Abril":"04","Mayo":"05",
+          "Junio":"06", "Julio":"07","Agosto":"08","Septiembre":"09","Octubre":"10",
+          "Noviembre":"11","Diciembre":"12"}
+       
+   month_select = month_number.get(month)
    
    query = '''
       SELECT fecha, categoria, monto, descripcion, cuotas
       FROM gastos
       WHERE strftime('%Y', fecha) = ? AND strftime('%m', fecha) = ?
    '''
-   cursor.execute(query, (year, month))
+   cursor.execute(query, (year, month_select))
    list_values = cursor.fetchall()
+   
+   if not list_values:
+      messagebox.showerror("Error",f"No se encontro informacion para el mes de {month} en {year}. La base de datos podria estar vacia")
+      conn.close()
+      return
    
    for item in treeview.get_children():
       treeview.delete(item)
@@ -79,24 +92,44 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
    
    conn.close()
 
-#def copy_row(event,treeview):
-#    selected_item = treeview.selection()
-#    if selected_item:
-#        values = treeview.item(selected_item[0], 'values')
-#        if event:
-#             column_index = int(treeview.identify_column(event.x)[1:]) - 1
-#             value = values[column_index]
-#             if value is not None:
-#                pyperclip.copy(str(values[column_index]))
-#             else:
-#                messagebox.showwarning("Error", "La celda seleccionada esta vacia")
-#        else:
-#             non_empty_values = [str(value) for value in values if value is not None]
-#             pyperclip.copy("\t".join(non_empty_values))
-#    else:
-#          messagebox.showwarning('ERROR', 'Por favor, seleccione un dato primero y vuelva a intentarlo!')
-#    
-#
+import pyperclip
+from tkinter import messagebox
+
+def copy_row(event, treeview):
+    try:
+        selected_item = treeview.selection()
+        if not selected_item:
+            messagebox.showwarning('ERROR', 'Seleccione un dato primero')
+            return
+        
+        values = treeview.item(selected_item[0], 'values')
+        if not values:
+            messagebox.showwarning("Error", "La fila seleccionada está vacía")
+            return
+        
+        if event:
+            column_index = int(treeview.identify_column(event.x)[1:]) - 1
+            if 0 <= column_index < len(values):
+                value = values[column_index]
+                if value:
+                    pyperclip.copy(str(value))
+                    messagebox.showinfo("Copiado", f"Fila copiada: {value}")
+                else:
+                    messagebox.showwarning("Error", "La celda seleccionada está vacía")
+            else:
+                messagebox.showwarning("Error", "Celda seleccionada no válida")
+        else:
+            non_empty_values = [str(value) for value in values if value]
+            if non_empty_values:
+                pyperclip.copy("\t".join(non_empty_values))
+                messagebox.showinfo("Copiado", "Fila copiada")
+            else:
+                messagebox.showwarning("Error", "La fila seleccionada está vacía")
+    except Exception as e:
+        messagebox.showerror("Error", f"Ocurrió un error: {e}")
+
+    
+
 #def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,month_select,treeview):
 #    selected_item = treeview.selection()[0]
 #    row_values = treeview.item(selected_item, 'values')
@@ -201,10 +234,10 @@ def show_chart(chart_shown,month_select,year,graphframe):
             
          conn = sqlite3.connect("./Gastos.db")
          cursor = conn.cursor()
-         print("entra al if show chart")
+         #print("entra al if show chart")
          
-         print(f"Año:{year}")
-         print(f"Mes:{month_select.zfill(2)}")
+         #print(f"Año:{year}")
+         #print(f"Mes:{month_select.zfill(2)}")
          month_n = month_number.get(month_select,None)
          query = '''
             SELECT categoria, SUM(monto)
@@ -212,28 +245,28 @@ def show_chart(chart_shown,month_select,year,graphframe):
             WHERE strftime('%Y', fecha) =? AND strftime('%m',fecha) = ?
             GROUP BY categoria    
          '''
-         print("Executing query:", query)
+         #print("Executing query:", query)
          cursor.execute(query, (year, month_n))
          data = cursor.fetchall()
-         print("Resultado de query:",data)
+         #print("Resultado de query:",data)
          
-         print("cargo la data")
+         #print("cargo la data")
          if not data:
              return #nada que mostrar
 	     
          
-         print("paso el if de no data")
+         #print("paso el if de no data")
          # preparo la data
          categorias = ["Comida", "Alquiler", "Expensas", "Internet", "Agua", "Gas", "Luz", "Transporte", "Salud", "Bolucompra"]       
          amounts = [0] * len(categorias)
-         print("preparo las categorias")
+         #print("preparo las categorias")
          for row in data:
             category, total_amount = row
             if category in categorias:
                index = categorias.index(category)
                amounts[index] = total_amount
   
-         print("cargo las filas")
+         #print("cargo las filas")
          sorted_categories = [category for _, category in sorted(zip(amounts, categorias), reverse=True)]
          sorted_amounts = [amount for amount, _ in sorted(zip(amounts, categorias), reverse=True)]
          total = sum(amounts)
@@ -273,7 +306,7 @@ def show_chart(chart_shown,month_select,year,graphframe):
   
          ax.set_xticks([x - 0.25 for x in range(len(categorias))])
          ax.set_xticklabels(sorted_categories, rotation=45, ha='right')
-         ax.set_facecolor('#c0c0c0')
+         ax.set_facecolor('#d8d8d8')
   
          # Prints the total spent in the selected month
          ax.text(0.95, 0.95, f"Total: ${int(total):,}", ha="right", va="top", 
@@ -287,7 +320,7 @@ def show_chart(chart_shown,month_select,year,graphframe):
              ax.text(0.95, 0.88, f"Saldo: ${int(saldo_restante):,}", ha="right", va="top", 
                  fontweight='bold', color='red', fontsize=10, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
           
-         figure.patch.set_facecolor("#808080")
+         figure.patch.set_facecolor("#F0F0F0")
          figure.tight_layout() # makes the labels fit the plot area
   
          # Create the canvas for the bar chart
@@ -299,7 +332,7 @@ def show_chart(chart_shown,month_select,year,graphframe):
          ax2.pie(pie_amounts, autopct=lambda p: '{:.1f}%'.format(p), startangle=90, pctdistance=0.75, radius=0.8,textprops={'fontsize':10, 'fontweight': 'bold'}  ,colors=['#4CAF50', '#FF9800', '#009688', '#2196F3', '#66c0f4', '#c7d5e0', '#ffd700', '#ff7f50', '#d11141', '#808080'], labels=pie_categorias)
          ax2.axis('equal')
          figure2.suptitle("Porcentaje por categoria", y=0.98)
-         figure2.patch.set_facecolor("#808080")
+         figure2.patch.set_facecolor("#F0F0F0")
          figure2.tight_layout()
   
          # Add each category total to the top of each bar
@@ -315,12 +348,12 @@ def show_chart(chart_shown,month_select,year,graphframe):
          pie_canvas.draw()
          pie_canvas.get_tk_widget().grid(row=0, column=1)
   
-         print("creo los frames")
+         #print("creo los frames")
          # Resize window when chart is shown
          graphframe.grid_rowconfigure(0, weight=1)
          graphframe.grid_columnconfigure(0, weight=1)    
          
          conn.close()
-         print("cerro la coneccion")
+         #print("cerro la coneccion")
      
      

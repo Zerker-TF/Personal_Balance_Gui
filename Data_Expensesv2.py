@@ -21,6 +21,9 @@ def create_expense_window(root):
         category = exp_type.get()
   
         cuota = exp_cuota.get()
+        if cuota == 'Cuotas':
+            cuota = 1
+    
         desc = exp_entry.get()
         year = year_select.get()
         df.insert_data(date,category,amount,cuota,desc,year,treeview,graphs)
@@ -49,10 +52,15 @@ def create_expense_window(root):
 
     #types of expenses
     combo_list = ["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra","Ingresos","Ahorros"]
+    
     cuota_list = ["1","3","6","12","18","24","36","48"]
+    
     months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+    
     cols = ["Fecha","Clasificacion","Monto","Descripcion"]
+    
     year_list = [str(i) for i in range (2024,datetime.date.today().year + 6)]
+    
     # Top main frames
     frame = ttk.LabelFrame(root,text="Datos")
     frame.pack(side='top',fill='both')
@@ -101,6 +109,7 @@ def create_expense_window(root):
     
     
     treeview = ttk.Treeview(tableframe,show="headings", yscrollcommand=tablescroll.set,columns=cols, height=10)
+    
     treeview.column("Fecha", width=100, anchor="center")
     treeview.column("Clasificacion", width=150, anchor="center")
     treeview.column("Monto", width=150, anchor="center")
@@ -110,6 +119,7 @@ def create_expense_window(root):
     treeview.heading("Monto", text="Monto", anchor="center")
     treeview.heading("Descripcion", text="Descripcion", anchor="center")
     treeview.grid(row=1, column=1)
+    
     tablescroll.config(command=treeview.yview)
     menu = None
     treeview.bind("<Button-3>",show_menu)

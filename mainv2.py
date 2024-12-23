@@ -4,38 +4,48 @@ from Data_Expensesv2 import create_expense_window
 from Data_Savingv2 import create_savings_window
 import sqlite3
 import os
-
+from tkinter import messagebox
 
 def initialize_database():
     filepath = "./Gastos.db"
     
     #Check if db exists
     if not os.path.exists(filepath):
-        conn = sqlite3.connect(filepath)
-        cursor = conn.cursor()
         
-     # Create 'gastos' table for everything
- 
-        cursor.execute('''
-                       CREATE TABLE IF NOT EXISTS gastos (
-                           id INTEGER PRIMARY KEY AUTOINCREMENT,
-                           fecha TEXT NOT NULL,
-                           categoria TEXT NOT NULL,
-                           monto REAL NOT NULL,
-                           descripcion TEXT,
-                           cuotas INTEGER DEFAULT 1
-                          )
-                       ''')
-        # save changes
-        conn.commit()
-        conn.close()
-        print("Se genero la base de datos y tablas correctamente.")
+        answer = messagebox.askokcancel(title="Base de datos no encontrada", message="Desea generar una nueva base de datos?")
+        
+        if answer:
+            
+            conn = sqlite3.connect(filepath)
+            cursor = conn.cursor()
+
+            # Create 'gastos' table for everything
+    
+            cursor.execute('''
+                           CREATE TABLE IF NOT EXISTS gastos (
+                               id INTEGER PRIMARY KEY AUTOINCREMENT,
+                               fecha TEXT NOT NULL,
+                               categoria TEXT NOT NULL,
+                               monto REAL NOT NULL,
+                               descripcion TEXT,
+                               cuotas INTEGER DEFAULT 1
+                              )
+                           ''')
+            # save changes
+            conn.commit()
+            conn.close()
+            print("Se genero la base de datos y tablas correctamente.")
+        else:
+            print("Usuario se fue a buscar su propia base de datos con juegos de azar y mujerzuelas")
+            return False
     else:
         print("Base de datos encontrada, cargando informacion.")
+        return True
+        
 
 def main():
     global root
-    #initialize_sheets()
+    
     initialize_database()
     root = tk.Tk()
     root.title("Balance Personal")
@@ -50,10 +60,10 @@ def main():
     
     
     frame_gastos = ttk.Frame(Ventana)
-    #frame_ahorros =ttk.Frame(Ventana)
+    
     
     Ventana.add(frame_gastos,text="Gastos")
-    #Ventana.add(frame_ahorros,text="Ahorros")
+    
     
     create_expense_window(frame_gastos)
     #create_savings_window(frame_ahorros)
