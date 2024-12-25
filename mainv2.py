@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from Data_Expensesv2 import create_expense_window
-from Data_Savingv2 import create_savings_window
 import sqlite3
 import os
 from tkinter import messagebox
