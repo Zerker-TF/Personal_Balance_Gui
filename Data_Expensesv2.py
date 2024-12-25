@@ -34,7 +34,7 @@ def create_expense_window(root):
        if item:
           menu = tk.Menu(treeview, tearoff=0)
           menu.add_command(label="Copiar",command=lambda: df.copy_row(event,treeview))
-          menu.add_command(label="Editar",command=lambda: df.edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,month_select,treeview))
+          menu.add_command(label="Editar",command=lambda: df.edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,treeview))
           menu.add_command(label="Eliminar",command=lambda: df.delete_row(month_select,treeview,year,graphs))
           menu.post(event.x_root, event.y_root)
           treeview.bind("<Button-1>",close_menu)

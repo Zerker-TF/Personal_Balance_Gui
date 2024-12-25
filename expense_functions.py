@@ -99,7 +99,7 @@ def copy_row(event, treeview):
     try:
         selected_item = treeview.selection()
         if not selected_item:
-            messagebox.showwarning('ERROR', 'Seleccione un dato primero')
+            messagebox.showwarning('ERROR', 'Seleccione una fila')
             return
         
         values = treeview.item(selected_item[0], 'values')
@@ -107,24 +107,53 @@ def copy_row(event, treeview):
             messagebox.showwarning("Error", "La fila seleccionada está vacía")
             return
         
-        if event:
-            column_index = int(treeview.identify_column(event.x)[1:]) - 1
-            if 0 <= column_index < len(values):
-                value = values[column_index]
-                if value:
-                    pyperclip.copy(str(value))
-                    messagebox.showinfo("Copiado", f"Fila copiada: {value}")
-                else:
-                    messagebox.showwarning("Error", "La celda seleccionada está vacía")
-            else:
-                messagebox.showwarning("Error", "Celda seleccionada no válida")
-        else:
-            non_empty_values = [str(value) for value in values if value]
-            if non_empty_values:
-                pyperclip.copy("\t".join(non_empty_values))
-                messagebox.showinfo("Copiado", "Fila copiada")
-            else:
-                messagebox.showwarning("Error", "La fila seleccionada está vacía")
+        row_data = "\t".join(map(str,values))
+        pyperclip.copy(row_data)
+        messagebox.showinfo("Copiado",f"Fila copiada:\n{row_data}")
+    
+    except Exception as e:
+        messagebox.showerror("Error", f"Ocurrió un error: {e}")
+        
+
+def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,treeview):
+    try:
+        selected_item = treeview.selection()
+        if not selected_item:
+            messagebox.showwarning("Error","Seleccione una fila.")
+            return
+        
+        values = treeview.item(selected_item[0],"values")
+        if not values:
+            messagebox.showwarning("Error","La fila esta vacia.")
+            return
+        
+        # Dealing with empty field
+        t_values = tuple(value if value else None for value in values)
+        # Enter values into widgets
+        date_str = t_values[0]
+        print(date_str)
+        exp_date.set_date(datetime.datetime.strptime(date_str,"%Y-%m-%d"))
+        exp_type.set(t_values[1])
+        exp_value.delete(0,tk.END)
+        exp_value.insert(0,t_values[2])
+        exp_entry.delete(0,tk.END)
+        exp_entry.insert(0,t_values[3])
+        exp_cuota.set(0,t_values[4])
+    
+        # Delete row from db
+        conn = sqlite3.connect("./Gastos.db")
+        cursor = conn.cursor()
+        query = '''
+            DELETE FROM gastos
+            WHERE fecha = ? AND categoria = ? AND monto = ? AND descripcion = ? AND cuotas = ?
+        '''
+        cursor.execute(query,values)
+        conn.commit()
+        conn.close()
+        
+        treeview.delete(selected_item[0])
+        
+       
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
 
