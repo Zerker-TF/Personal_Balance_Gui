@@ -92,8 +92,7 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
    
    conn.close()
 
-import pyperclip
-from tkinter import messagebox
+
 
 def copy_row(event, treeview):
     try:
@@ -111,6 +110,45 @@ def copy_row(event, treeview):
         pyperclip.copy(row_data)
         messagebox.showinfo("Copiado",f"Fila copiada:\n{row_data}")
     
+    except Exception as e:
+        messagebox.showerror("Error", f"Ocurrió un error: {e}")
+        
+
+def delete_row(treeview,graphs):
+    try:
+        selected_item = treeview.selection()
+        if not selected_item:
+            messagebox.showwarning('ERROR','Selecione una fila')
+            return
+
+        values = treeview.item(selected_item[0],'values')
+        if not values:
+            messagebox.showwarning('Error','La fila esta vacia')
+            return
+       
+        row_data = "\t".join(map(str,values))
+        date = datetime.datetime.strptime(values[0], "%Y-%m-%d")
+        month = date.month
+        year = date.year
+        
+        # delete from db
+        conn = sqlite3.connect("./Gastos.db")
+        cursor = conn.cursor()
+        
+        query = '''
+            DELETE FROM gastos
+            WHERE fecha = ? AND categoria = ? AND monto = ? AND descripcion = ? AND cuotas = ? 
+        '''
+        cursor.execute(query,values)
+        conn.commit()
+        conn.close()
+
+        treeview.delete(selected_item[0])
+
+        messagebox.showinfo('Eliminado',f'La fila:\n{row_data}\nfue eliminada')
+        
+        show_chart(True,month,year,graphs)
+
     except Exception as e:
         messagebox.showerror("Error", f"Ocurrió un error: {e}")
         
