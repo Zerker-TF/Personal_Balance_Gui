@@ -127,6 +127,11 @@ def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,treeview):
             messagebox.showwarning("Error","La fila esta vacia.")
             return
         
+        # Data needed if cuota > 1
+        cuotas = int(values[4]) if values[4] else 1
+        date = datetime.datetime.strptime(values[0], "%Y-%m-%d")
+        day = date.day
+        
         # Dealing with empty field
         t_values = tuple(value if value else None for value in values)
         # Enter values into widgets
@@ -138,7 +143,7 @@ def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,treeview):
         exp_value.insert(0,t_values[2])
         exp_entry.delete(0,tk.END)
         exp_entry.insert(0,t_values[3])
-        exp_cuota.set(0,t_values[4])
+        exp_cuota.set(t_values[4])
     
         # Delete row from db
         conn = sqlite3.connect("./Gastos.db")
@@ -148,6 +153,23 @@ def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,treeview):
             WHERE fecha = ? AND categoria = ? AND monto = ? AND descripcion = ? AND cuotas = ?
         '''
         cursor.execute(query,values)
+        
+        # if edited row has cuota > 1, deletes from the following months as well
+        if cuotas > 1:
+            month_index = date.month
+            year = date.year
+            
+            for i in range(1,cuotas):
+                month_index += 1
+                if month_index > 12:
+                    month_index = 1
+                    year += 1
+                next_date = f"{year}-{str(month_index).zfill(2)}-{str(day).zfill(2)}"
+                cursor.execute('''
+                               DELETE FROM gastos
+                               WHERE fecha = ? AND categoria = ? AND monto = ? AND descripcion = ?
+                               ''',next_date,values[1],values[2],values[3])
+        
         conn.commit()
         conn.close()
         
@@ -159,42 +181,7 @@ def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,treeview):
 
     
 
-#def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,month_select,treeview):
-#    selected_item = treeview.selection()[0]
-#    row_values = treeview.item(selected_item, 'values')
-#    date = row_values[0]
-#    date = datetime.datetime.strptime(date, "%Y-%m-%d").date() #converting to datetime.date format
-#      # Insert values into widgets
-#    exp_date.set_date(date)
-#    exp_type.set(row_values[1])
-#    exp_value.delete(0,'end')
-#    exp_value.insert(0, row_values[2])
-#    exp_entry.delete(0,'end')
-#    exp_entry.insert(0, row_values[3])
-#    exp_cuota.set(row_values[4])
-#      # Delete the row from treeview
-#    treeview.delete(selected_item)
-#    # Delete the row from Excel file
-#    filepath = "./Gastos.xlsx"
-#    workbook = openpyxl.load_workbook(filepath)
-#    month = month_select.get()
-#    try:
-#       sheet = workbook[month]
-#    except KeyError:
-#       sheet = workbook.active
-#    # Find the row 
-#    for i, row in enumerate(list(sheet.values)):
-#       if i>0:
-#          row_date = row[0]
-#          if isinstance(row_date,str):
-#             row_date = datetime.datetime.strptime(row_date, "%Y-%m-%d").date()
-#          elif isinstance(row_date, datetime.datetime):
-#             row_date = row_date.date()
-#          if row_date == date:
-#             sheet.delete_rows(i+1)
-#             break
-#    workbook.save(filepath)
-#    
+
  
 #def delete_row(month_select,treeview,year,graphs):
 #    selected_item = treeview.selection()[0]
