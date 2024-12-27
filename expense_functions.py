@@ -296,7 +296,7 @@ def show_chart(chart_shown,month_select,year,graphframe):
          query = '''
             SELECT categoria, SUM(monto)
             FROM gastos
-            WHERE strftime('%Y', fecha) =? AND strftime('%m',fecha) = ?
+            WHERE strftime('%Y', fecha) =? AND strftime('%m',fecha) = ? 
             GROUP BY categoria    
          '''
          #print("Executing query:", query)
@@ -308,7 +308,15 @@ def show_chart(chart_shown,month_select,year,graphframe):
          if not data:
              return #nada que mostrar
 	     
+         query_ingreso = '''
+            SELECT SUM(monto)
+            FROM gastos
+            WHERE strftime('%Y',fecha) = ? AND strftime('%m',fecha) = ? AND categoria = "Ingresos"
          
+         '''
+         cursor.execute(query_ingreso,(year,month_n))
+         ingresos_fila = cursor.fetchone()
+         ingresos = ingresos_fila[0] if  ingresos_fila and ingresos_fila[0] is not None else 0
          #print("paso el if de no data")
          # preparo la data
          categorias = ["Comida", "Alquiler", "Expensas", "Internet", "Agua", "Gas", "Luz", "Transporte", "Salud", "Bolucompra"]       
@@ -324,7 +332,6 @@ def show_chart(chart_shown,month_select,year,graphframe):
          sorted_categories = [category for _, category in sorted(zip(amounts, categorias), reverse=True)]
          sorted_amounts = [amount for amount, _ in sorted(zip(amounts, categorias), reverse=True)]
          total = sum(amounts)
-         ingresos = sum(float(row[2]) for row in data if row[1] == "Ingresos")
          saldo_restante = ingresos-total
           
          # Percentages for pie chart   
