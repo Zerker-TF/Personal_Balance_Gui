@@ -87,11 +87,10 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
    
    treeview.insert("","end",values=[date,category,amount,desc if desc else " "])
    month_select = date_obj.strftime("%B")
+   conn.close()
+ 
    show_chart(True ,month_select,year_select,graphs)
    
-   
-   conn.close()
-
 
 
 def copy_row(event, treeview):
@@ -219,38 +218,6 @@ def edit_row(exp_date,exp_type,exp_value,exp_entry,exp_cuota,treeview):
 
     
 
-
- 
-#def delete_row(month_select,treeview,year,graphs):
-#    selected_item = treeview.selection()[0]
-#    row_values = treeview.item(selected_item, 'values')
-#    date = row_values[0]
-#    date = datetime.datetime.strptime(date, "%Y-%m-%d").date() #converting to datetime.date format
-#    #Delete the row from treeview
-#    treeview.delete(selected_item)
-#  # Delete the row from Excel file
-#    filepath = "./Gastos.xlsx"
-#    workbook = openpyxl.load_workbook(filepath)
-#    month = month_select.get()
-#    try:
-#       sheet = workbook[month]
-#    except KeyError:
-#       sheet = workbook.active
-#  # Find the row 
-#    for i, row in enumerate(list(sheet.values)):
-#       if i>0:
-#          row_date = row[0]
-#          if isinstance(row_date,str):
-#             row_date = datetime.datetime.strptime(row_date, "%Y-%m-%d").date()
-#          elif isinstance(row_date, datetime.datetime):
-#             row_date = row_date.date()
-#          if row_date == date:
-#             sheet.delete_rows(i+1)
-#             break
-#    workbook.save(filepath)    
-#    load_data(month_select,year,treeview,graphs)
-    
- 
  
 def show_chart(chart_shown,month_select,year,graphframe):
        global  canvas, pie_canvas
@@ -317,11 +284,14 @@ def show_chart(chart_shown,month_select,year,graphframe):
          cursor.execute(query_ingreso,(year,month_n))
          ingresos_fila = cursor.fetchone()
          ingresos = ingresos_fila[0] if  ingresos_fila and ingresos_fila[0] is not None else 0
+         
          #print("paso el if de no data")
          # preparo la data
+         
          categorias = ["Comida", "Alquiler", "Expensas", "Internet", "Agua", "Gas", "Luz", "Transporte", "Salud", "Bolucompra"]       
          amounts = [0] * len(categorias)
          #print("preparo las categorias")
+         
          for row in data:
             category, total_amount = row
             if category in categorias:
@@ -332,7 +302,7 @@ def show_chart(chart_shown,month_select,year,graphframe):
          sorted_categories = [category for _, category in sorted(zip(amounts, categorias), reverse=True)]
          sorted_amounts = [amount for amount, _ in sorted(zip(amounts, categorias), reverse=True)]
          total = sum(amounts)
-         saldo_restante = ingresos-total
+         saldo_restante = ingresos - total
           
          # Percentages for pie chart   
          percentages = [f"{(amount/total)*100:.2f}%" for amount in amounts]

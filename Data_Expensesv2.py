@@ -9,6 +9,7 @@ def create_expense_window(root):
     def cargar_month():
         month = month_select.get()
         year = year_select.get()
+        
         df.load_data(month, year,treeview,graphs)
         
     def insertar():
@@ -18,6 +19,7 @@ def create_expense_window(root):
           messagebox.showerror("Error","Por favor ingrese un monto valido")
           return
         date = exp_date.get()
+        #HACER CHECK DE QUE SE SELECCIONO UNA CATEGORIA
         category = exp_type.get()
   
         cuota = exp_cuota.get()
@@ -26,7 +28,11 @@ def create_expense_window(root):
     
         desc = exp_entry.get()
         year = year_select.get()
-        df.insert_data(date,category,amount,cuota,desc,year,treeview,graphs)
+        if category == 'Categoria':
+            messagebox.showerror("Error","Seleccione una categoria valida.")
+            return
+        else:
+            df.insert_data(date,category,amount,cuota,desc,year,treeview,graphs)
     
     def show_menu(event):
        item = treeview.identify_row(event.y)
@@ -57,7 +63,7 @@ def create_expense_window(root):
     
     months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
     
-    cols = ["Fecha","Clasificacion","Monto","Descripcion"]
+    cols = ["Fecha","Categoria","Monto","Descripcion"]
     
     year_list = [str(i) for i in range (2024,datetime.date.today().year + 6)]
     
@@ -79,7 +85,7 @@ def create_expense_window(root):
     date_from = DateEntry(widgets_frame, selecmode="day",year=2024,month=1,day=1)
     
     exp_type = ttk.Combobox(widgets_frame,values=combo_list)
-    exp_type.insert(0,"Clasificacion")
+    exp_type.insert(0,"Categoria")
     exp_type.state(["readonly"])
     
     exp_value = ttk.Entry(widgets_frame)
@@ -111,11 +117,11 @@ def create_expense_window(root):
     treeview = ttk.Treeview(tableframe,show="headings", yscrollcommand=tablescroll.set,columns=cols, height=10)
     
     treeview.column("Fecha", width=100, anchor="center")
-    treeview.column("Clasificacion", width=150, anchor="center")
+    treeview.column("Categoria", width=150, anchor="center")
     treeview.column("Monto", width=150, anchor="center")
     treeview.column("Descripcion", width=250, anchor="center")
     treeview.heading("Fecha", text="Fecha",anchor="center")
-    treeview.heading("Clasificacion", text="Clasificacion", anchor="center")
+    treeview.heading("Categoria", text="Categoria", anchor="center")
     treeview.heading("Monto", text="Monto", anchor="center")
     treeview.heading("Descripcion", text="Descripcion", anchor="center")
     treeview.grid(row=1, column=1)
