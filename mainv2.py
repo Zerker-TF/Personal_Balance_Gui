@@ -3,7 +3,7 @@ from tkinter import ttk
 from Data_Expensesv2 import create_expense_window
 import sqlite3
 import os
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 
 def initialize_database():
     filepath = "./Gastos.db"
@@ -19,9 +19,10 @@ def initialize_database():
             cursor = conn.cursor()
 
             # Create 'gastos' table for everything
-    
-            cursor.execute('''
-                           CREATE TABLE IF NOT EXISTS gastos (
+            name = simpledialog.askstring("Crear un usuario","Ingrese un nombre de usuario")
+            
+            cursor.execute(f'''
+                           CREATE TABLE IF NOT EXISTS {name} (
                                id INTEGER PRIMARY KEY AUTOINCREMENT,
                                fecha TEXT NOT NULL,
                                categoria TEXT NOT NULL,
@@ -39,6 +40,21 @@ def initialize_database():
             return False
     else:
         print("Base de datos encontrada, cargando informacion.")
+        #Leo el nombre de las tablas para presentar el combobox y elegir el usuario a cargar.
+        # Si solo hay una tabla, carga automaticamente dicha tabla.
+        conn = sqlite3.connect(filepath)
+        cursor = conn.cursor()
+        
+        #saco los nombres de las tablas
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tablas = [fila[0] for fila in cursor.fetchall()]
+        
+        conn.close()
+        
+        if len(tablas) == 1:
+            tabla_selec = tablas[0]
+            messagebox.showinfo("Usuario encontrado",f"Cargando usuario {tabla_selec}")
+       
         return True
         
 
@@ -63,11 +79,10 @@ def main():
     
     Ventana.add(frame_gastos,text="Gastos")
     
+    #usuario = 
     
     create_expense_window(frame_gastos)
-    #create_savings_window(frame_ahorros)
-    
-   # Ventana.bind("<<NotebookTabChanged>>", resize)
+
     
     root.mainloop()
     
