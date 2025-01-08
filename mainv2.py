@@ -19,19 +19,30 @@ def initialize_database():
             cursor = conn.cursor()
 
             # Create 'gastos' table for everything
-            name = simpledialog.askstring("Crear un usuario","Ingrese un nombre de usuario")
             
-            cursor.execute(f'''
-                           CREATE TABLE IF NOT EXISTS {name} (
+            cursor.execute('''
+                           CREATE TABLE IF NOT EXISTS gastos (
                                id INTEGER PRIMARY KEY AUTOINCREMENT,
                                fecha TEXT NOT NULL,
                                categoria TEXT NOT NULL,
                                monto REAL NOT NULL,
                                descripcion TEXT,
-                               cuotas INTEGER DEFAULT 1
+                               cuotas INTEGER DEFAULT 1,
+                               usuario INTEGER NOT NULL
                               )
                            ''')
             # save changes
+            cursor.execute('''
+                          CREATE TABLE IF NOT EXISTS users (
+                              id INTEGER PRIMARY KEY AUTOINCREMENT,
+                              usuario TEXT NOT NULL   
+                              ) 
+                           
+                           ''')
+            name = simpledialog.askstring("Crear un usuario","Ingrese un nombre de usuario")
+            if name:
+                cursor.execute("INSERT INTO users (usuario) VALUES (?)",(name,))
+           
             conn.commit()
             conn.close()
             print("Se genero la base de datos y tablas correctamente.")
@@ -40,23 +51,47 @@ def initialize_database():
             return False
     else:
         print("Base de datos encontrada, cargando informacion.")
-        #Leo el nombre de las tablas para presentar el combobox y elegir el usuario a cargar.
-        # Si solo hay una tabla, carga automaticamente dicha tabla.
+        #Leo la columna usuario de las tablas para presentar el combobox y elegir el usuario a cargar.
+        # cada numero de 1 a n corresponde a un usuario, orden dictado en como se guarda en una tabal aparte para usuarios
+        # Si solo hay una fila en la tabla de usuarios, carga automaticamente dicho usuario.
         conn = sqlite3.connect(filepath)
         cursor = conn.cursor()
         
-        #saco los nombres de las tablas
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        tablas = [fila[0] for fila in cursor.fetchall()]
+        #saco los nombres de los usuarios
+        cursor.execute("SELECT usuario FROM users")
+        tablas = cursor.fetchall()
+        print(tablas)
         
         conn.close()
-        
-        if len(tablas) == 1:
-            tabla_selec = tablas[0]
-            messagebox.showinfo("Usuario encontrado",f"Cargando usuario {tabla_selec}")
        
+        if len(tablas) == 1:
+            tabla_select = tablas[0][0]
+            messagebox.showinfo("Usuario detectado",f"Cargando gastos de: {tabla_select}")
+            
         return True
         
+def create_user_menu(root):
+    
+    user_menu = tk.Menu()
+    barra = tk.Menu(user_menu, tearoff=0)
+    user_menu.add_cascade(menu=barra,label="Usuarios")
+    barra.add_command(
+        label="Nuevo Usuario",command=print("nuevo usuario")
+    )
+    barra.add_command(
+        label="Cambiar Usuario",command=print("cambiar usuario")
+    )
+    barra.add_command(
+        label="Salir",command=barra.quit
+    )
+    
+    
+    
+    root.config(menu=user_menu)
+    
+    
+    
+    return
 
 def main():
     global root
@@ -75,11 +110,11 @@ def main():
     
     
     frame_gastos = ttk.Frame(Ventana)
-    
-    
     Ventana.add(frame_gastos,text="Gastos")
     
-    #usuario = 
+    # Menu de usuarios
+    create_user_menu(root)
+    
     
     create_expense_window(frame_gastos)
 
