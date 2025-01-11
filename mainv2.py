@@ -4,6 +4,7 @@ from Data_Expensesv2 import create_expense_window
 import sqlite3
 import os
 from tkinter import messagebox, simpledialog
+import expense_functions as df
 
 def initialize_database():
     filepath = "./Gastos.db"
@@ -76,10 +77,13 @@ def create_user_menu(root):
     barra = tk.Menu(user_menu, tearoff=0)
     user_menu.add_cascade(menu=barra,label="Usuarios")
     barra.add_command(
-        label="Nuevo Usuario",command=print("nuevo usuario")
+        label="Nuevo Usuario",command=lambda: df.new_user(root)
     )
     barra.add_command(
-        label="Cambiar Usuario",command=print("cambiar usuario")
+        label="Cambiar Usuario",command=lambda: df.change_user()
+    )
+    barra.add_command(
+        label="Eliminar Usuario", command=lambda: df.delete_user()
     )
     barra.add_command(
         label="Salir",command=barra.quit

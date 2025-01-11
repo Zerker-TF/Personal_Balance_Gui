@@ -387,4 +387,64 @@ def show_chart(chart_shown,month_select,year,graphframe):
          conn.close()
          #print("cerro la coneccion")
      
-     
+def new_user(root):
+    # hacer una ventana popup que pida el nombre (limitar cantidad de caracteres y eliminar caracteres especiales)
+    # si ya existe un usuario con el mismo nombre, mostrar un mensaje de warning y pedir que ingrese otro caracter para diferenciar
+    print("nuevo usuario")
+
+    
+    popup = tk.Toplevel(root)
+    popup.title("Ingresar nuevo usuario")
+    popup.geometry("300x200")
+    label = tk.Label(popup, text="Ingrese nombre del nuevo usuario")
+    label.pack(pady=10)
+    
+    nombre_entry = tk.Entry(popup)
+    nombre_entry.pack(pady=10)
+    
+    # Revisar si ya existe el nombre
+   
+    new_usuariobtn = tk.Button(popup,text="Guardar",command=lambda: guardar_usuario())
+    new_usuariobtn.pack(pady=10)
+    
+    def guardar_usuario():
+         nombre = nombre_entry.get()
+         
+         if not nombre:
+             messagebox.showerror("Error","Ingrese un nombre de usuario")
+             return
+         if len(nombre) > 20:
+             messagebox.showerror("Error","El nombre debe tener menos de 20 caracteres")
+             return
+        
+
+         filepath = "./Gastos.db"
+         try:
+             conn = sqlite3.connect(filepath)
+             cursor = conn.cursor()
+
+             cursor.execute("SELECT 1 FROM users WHERE usuario = ?",(nombre,))
+             if cursor.fetchone():
+                 messagebox.showwarning("Nombre no disponible","El nombre de usuario ya esta en uso.")
+                 return
+
+             cursor.execute("INSERT INTO users (usuario) VALUES (?)",(nombre,))
+             conn.commit()
+             messagebox.showinfo("Exito",f"Usuario '{nombre}' creado correctamente.")
+             popup.destroy()
+
+         except sqlite3.Error as e:
+             messagebox.showerror("Error",f"No se pudo guardar el usuario.\n Error:{e}")
+         finally:
+             conn.close()
+    
+    
+def change_user():
+    # debe mostrar un listado dentro del mismo menu como pestaña y al seleccionar un usuario debe volver a correr el programa
+    print("cambiar usuario")
+    
+def delete_user():
+    #genera una ventana popup con un combobox con todos los usuarios guardados y dos botones ("Eliminar", "Cancelar")
+    # Cuando se seleccione eliminar, mostar un messagebox.askyesno para confirmar con aviso que no sera posible recuperar la informacion una vez confirmado
+    # y eliminar todas las filas de la db que tengan el id del usuario en la tabla de gastos.
+    print("usuario eliminado")

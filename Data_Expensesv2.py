@@ -67,7 +67,10 @@ def create_expense_window(root):
     
     year_list = [str(i) for i in range (2024,datetime.date.today().year + 6)]
     
+
+    
     # Top main frames
+ 
     frame = ttk.LabelFrame(root,text="Datos")
     frame.pack(side='top',fill='both')
     
