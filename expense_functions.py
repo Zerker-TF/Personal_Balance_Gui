@@ -7,6 +7,7 @@ import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pyperclip
+import Data_Expensesv2 as de
 
 
 
@@ -64,11 +65,11 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
       
       for i in range(cuota):
          new_date = f"{year}-{str(month_index).zfill(2)}-{date[8:]}"
-         new_row = (new_date, category, divided_amount, desc if desc else " ", cuota if cuota else 1)
+         new_row = (new_date, category, divided_amount, desc if desc else " ", cuota if cuota else 1,1)
          #Guardo las cuotas en los meses correspondientes
          cursor.execute('''
-                        INSERT INTO gastos(fecha, categoria, monto, descripcion, cuotas)
-                        VALUES (?, ?, ?, ?, ?)
+                        INSERT INTO gastos(fecha, categoria, monto, descripcion, cuotas,usuario)
+                        VALUES (?, ?, ?, ?, ?,?)
                         ''',new_row)
          month_index += 1
          if month_index > 12:
@@ -76,10 +77,10 @@ def insert_data(exp_date,category,amount,cuota,desc,year_select,treeview,graphs)
             year += 1
          
    else:
-      new_row = (date, category, amount, desc if desc else " ", cuota if cuota else 1)
+      new_row = (date, category, amount, desc if desc else " ", cuota if cuota else 1,1)
       cursor.execute('''
-                     INSERT INTO gastos (fecha, categoria, monto, descripcion, cuotas)
-                     VALUES (?, ?, ?, ?, ?)
+                     INSERT INTO gastos (fecha, categoria, monto, descripcion, cuotas,usuario)
+                     VALUES (?, ?, ?, ?, ?,?)
                      ''',new_row)
 
    conn.commit()
@@ -395,7 +396,7 @@ def new_user(root):
     
     popup = tk.Toplevel(root)
     popup.title("Ingresar nuevo usuario")
-    popup.geometry("300x200")
+    popup.geometry("200x150")
     label = tk.Label(popup, text="Ingrese nombre del nuevo usuario")
     label.pack(pady=10)
     
@@ -439,9 +440,47 @@ def new_user(root):
              conn.close()
     
     
-def change_user():
+def change_user(root):
     # debe mostrar un listado dentro del mismo menu como pestaña y al seleccionar un usuario debe volver a correr el programa
     print("cambiar usuario")
+    popup = tk.Toplevel(root)
+    popup.title("Seleccione un usuario")
+    popup.geometry("200x150")
+    
+    filepath = "./Gastos.db"
+    try:
+        
+        conn = sqlite3.connect(filepath)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, usuarios FROM users")
+        user_list = cursor.fetchall()
+        conn.close()
+        
+        label = tk.Label(popup,text="Seleccione un usuario:")
+        label.pack(pady=10)
+        
+        user_combo = ttk.Combobox(popup,values=[f"{user_list[1]} (ID:{user_list[0]})" for user in user_list])
+        user_combo.pack(pady=5)
+        user_combo.current(0)
+        
+        def confirmar_user():
+           
+           usuario_elegido = user_combo.get() 
+           user_id = int(usuario_elegido.split("(ID:")[1].split(")")[0])
+           
+           dia = datetime.datetime.today() 
+           mes = dia.strftime("%B")
+           año = str(dia.year)
+           
+           de.create_expense_window(root)
+           popup.destroy()
+        
+        confirm_btt = tk.Button(popup,text="Confirmar",command=confirmar_user)    
+        confirm_btt.pack(pady=10)
+    except sqlite3.Error as e:
+             messagebox.showerror("Error",f"No se pudo guardar el usuario.\n Error:{e}")
+    finally:
+        return
     
 def delete_user():
     #genera una ventana popup con un combobox con todos los usuarios guardados y dos botones ("Eliminar", "Cancelar")
