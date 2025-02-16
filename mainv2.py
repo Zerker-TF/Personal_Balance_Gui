@@ -6,7 +6,7 @@ import os
 from tkinter import messagebox, simpledialog
 import expense_functions as df
 
-def initialize_database():
+def initialize_database(root):
     filepath = "./Gastos.db"
     
     #Check if db exists
@@ -40,13 +40,24 @@ def initialize_database():
                               ) 
                            
                            ''')
+            # categorias
+            cursor.execute(''' 
+                           CREATE TABLE IF NOT EXISTS categorias(
+                               id INTEGER PRIMARY KEY AUTOINCREMENT,
+                               nombre TEXT NOT NULL,
+                               user INTEGER NOT NULL
+                           )
+                           ''')
+            
             name = simpledialog.askstring("Crear un usuario","Ingrese un nombre de usuario")
             if name:
                 cursor.execute("INSERT INTO users (usuario) VALUES (?)",(name,))
+                user_id = cursor.lastrowid
            
             conn.commit()
             conn.close()
             print("Se genero la base de datos y tablas correctamente.")
+            return user_id
         else:
             print("Usuario se fue a buscar su propia base de datos con juegos de azar y mujerzuelas")
             return False
@@ -60,17 +71,40 @@ def initialize_database():
         
         #saco los nombres de los usuarios
         cursor.execute("SELECT usuario FROM users")
-        tablas = cursor.fetchall()
-        print(tablas)
+        users = cursor.fetchall()
+        print(users)
         
-        conn.close()
-       
-        if len(tablas) == 1:
-            tabla_select = tablas[0][0]
-            messagebox.showinfo("Usuario detectado",f"Cargando gastos de: {tabla_select}")
-            
-        return True
         
+        if len(users) == 0:
+            messagebox.showerror("Error","No hay usuarios en la base de datos.")
+            return None
+        elif len(users) == 1:
+            user_id = users[0][0] #id del unico usuario
+            messagebox.showinfo("Usuario detectado",f"Cargando gastos de: {users[0][1]}")
+                
+            conn.close() 
+            return user_id
+        else:
+            #mas de 1 usuario guardado
+            def on_select():
+                selected_user = user_combobox.get()
+                user_id = [user[0] for user in users if user[1]==selected_user[0]]
+                selection_window.destroy()
+                root.user_id = user_id # id del usuario elegido
+        
+        selection_window = tk.Toplevel(root)
+        selection_window.title("Seleccionar Usuario")
+        
+        tk.Label(selection_window,text="Seleccione un usuario:").pack(pady=10)
+        user_combobox = ttk.Combobox(selection_window, values=[users[1] for user in users])
+        user_combobox.pack(pady=10)
+        user_combobox.current(0)
+        
+        tk.Button(selection_window, text="Seleccionar",command=on_select).pack(pady=10)
+        
+        selection_window.wait_window()
+        return root.user_id
+    
 def create_user_menu(root):
     
     user_menu = tk.Menu()
@@ -100,8 +134,14 @@ def create_user_menu(root):
 def main():
     global root
     
-    initialize_database()
     root = tk.Tk()
+    
+    user_id = initialize_database(root)
+    if user_id is None:
+        print("No fue posible inicializar la base de datos o seleccionar un usuario.")
+        root.destroy()
+        return
+    
     root.title("Balance Personal")
     root.minsize(1260, 410)
     root.maxsize(1260, 950)
@@ -116,11 +156,11 @@ def main():
     frame_gastos = ttk.Frame(Ventana)
     Ventana.add(frame_gastos,text="Gastos")
     
-    # Menu de usuarios
+  
+ 
     create_user_menu(root)
     
-    
-    create_expense_window(frame_gastos)
+    create_expense_window(frame_gastos,user_id)
 
     
     root.mainloop()
