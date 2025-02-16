@@ -4,8 +4,18 @@ from tkcalendar import Calendar, DateEntry
 import datetime
 import expense_functions as df
 from tkinter import messagebox
+import sqlite3
 
-def create_expense_window(root):
+def fetch_categoria(user_id):
+    conn = sqlite3.connect("./Gastos.db")
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT nombre FROM categoria WHERE user = ?",(user_id,))
+    categorias = [row[0] for row in cursor.fetchall()]
+    
+    return categorias
+
+def create_expense_window(root,user_id):
     def cargar_month():
         month = month_select.get()
         year = year_select.get()
@@ -57,7 +67,7 @@ def create_expense_window(root):
 
 
     #types of expenses
-    combo_list = ["Comida","Alquiler","Expensas","Internet","Agua","Gas","Luz","Transporte","Salud","Bolucompra","Ingresos","Ahorros"]
+    combo_list = fetch_categoria(user_id)
     
     cuota_list = ["1","3","6","12","18","24","36","48"]
     
