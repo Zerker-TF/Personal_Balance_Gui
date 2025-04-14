@@ -1,5 +1,5 @@
 # Personal_Balance_Gui
-Simple Python GUI to keep track of monthly expenses and savings linked to an excel file.
+Simple Python GUI to keep track of monthly expenses and savings linked to an SQL database.
 
 ## Features
 You'll be able to track expenses and check on your savings in two separate windows
